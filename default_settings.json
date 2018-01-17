@@ -1,0 +1,14 @@
+{
+    "debug": false,
+    "http": {
+        "port": 8126,
+        "username": "",
+        "password": ""
+    },
+    "docker_connection": {
+        "type": "socket",
+        "path": "/var/run/docker.sock",
+        "host": "",
+        "port": ""
+    }
+}
