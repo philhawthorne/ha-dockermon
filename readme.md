@@ -103,7 +103,7 @@ You can use this service as a [RESTful switch](https://home-assistant.io/compone
 
 ```yaml
 switch:
-    - platform: rest
+  - platform: rest
     resource: http://127.0.0.1:8126/container/grafana
     name: Grafana
     body_on: '{"state": "start"}'
