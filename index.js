@@ -99,7 +99,54 @@ app.all('/container/:containerId', function (req, res) {
                         state: "stopped"
                     });
                 });
-            }            
+            } else if (req.body.cmd != null) {
+//                if (config.get("debug"))
+                    console.log("Attempting to execute command in container " + container.Id);
+                var options = {
+                  Cmd: [req.body.cmd],
+                  AttachStdout: true,
+                  AttachStderr: true
+                };
+                var container = docker.getContainer(container.Id);
+                container.exec(options, function (err, exec) {
+                    if (err) {
+  //                      if (config.get("debug")) {
+                            console.log("Failed to get container " + container.Id);
+                            console.log(err);
+          //              }
+
+                        res.status(500);
+                        res.send(err);
+                        return;
+                    }
+                    if (config.get("debug"))
+                        console.log("Container stopped");
+
+                    exec.start(function(err,stream)
+                    {
+                      if (err) {
+    //                      if (config.get("debug")) {
+                              console.log("Failed to execute in container " + container.Id);
+                              console.log(err);
+        //                  }
+
+                          res.status(500);
+                          res.send(err);
+                          return;
+                      }
+
+			console.log("executed query");
+//                      stream.setEncoding('utf8');
+                      //stream.pipe(process.stdout);
+ //                     res.status(200); //We found the container! This reponse can be trusted
+        	      stream.pipe(res);
+                      return;
+                    });
+			return;
+                    res.status(200);
+                    res.send("no result returned");
+                });
+            }
         }, function (status, message) {
             if (config.get("debug"))
                 console.log("Failed to get status of Docker container");
