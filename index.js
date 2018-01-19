@@ -139,12 +139,23 @@ app.all('/container/:containerId', function (req, res) {
 //                      stream.setEncoding('utf8');
                       //stream.pipe(process.stdout);
  //                     res.status(200); //We found the container! This reponse can be trusted
-        	      stream.pipe(res);
-                      return;
+
+			const chunks = [];
+
+			stream.on("data", function (chunk) {
+    				chunks.push(chunk.toString());
+  			});
+			  // Send the buffer or you can put it into a var
+  			stream.on("end", function () {
+    				res.send(chunks.join('').substr(8));
+  			})
+
+        	      //stream.pipe(res);
+                      //return;
                     });
 			return;
-                    res.status(200);
-                    res.send("no result returned");
+                    //res.status(200);
+                    //res.send("no result returned");
                 });
             }
         }, function (status, message) {
