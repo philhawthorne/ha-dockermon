@@ -134,19 +134,14 @@ app.all('/container/:containerId', function (req, res) {
                           res.send(err);
                           return;
                       }
-
 			console.log("executed query");
-//                      stream.setEncoding('utf8');
-                      //stream.pipe(process.stdout);
- //                     res.status(200); //We found the container! This reponse can be trusted
-
 			const chunks = [];
-
 			stream.on("data", function (chunk) {
     				chunks.push(chunk.toString());
   			});
 			  // Send the buffer or you can put it into a var
   			stream.on("end", function () {
+				// We remove the first 8 chars as the contain a unicode START OF HEADING followed by ENQUIRY.
     				res.send(chunks.join('').substr(8));
   			})
 
