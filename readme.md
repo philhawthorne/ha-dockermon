@@ -97,6 +97,21 @@ Calls to this URL will issue a `docker restart <container name>` on the host mac
 
 Useful in a Home Assistant script to restart containers (including Home Assistant itself).
 
+#### POST /container/{container name}/exec
+
+Allows you to execute commands inside a running container. When making a call to this endpoint you must send the correct `Content-Type` headers and JSON as the body. An example request with cURL is below.
+
+You must also send a `command` variable which contains the command you would like to run in the container.
+
+```bash
+curl --request POST \
+--url http://127.0.0.1:8126/container/grafana/exec \
+--header 'content-type: application/octet-stream' \
+--data '{"command": "ls -a"}'
+```
+
+The response will be a json object with a `result` key containing the output from the command executed.
+
 ### Home Assistant RESTful Switch
 
 You can use this service as a [RESTful switch](https://home-assistant.io/components/switch.rest/) inside Home Assistant.
