@@ -99,7 +99,60 @@ app.all('/container/:containerId', function (req, res) {
                         state: "stopped"
                     });
                 });
-            }            
+            } else if (req.body.cmd != null) {
+//                if (config.get("debug"))
+                    console.log("Attempting to execute command in container " + container.Id);
+                var options = {
+                  Cmd: [req.body.cmd],
+                  AttachStdout: true,
+                  AttachStderr: true
+                };
+                var container = docker.getContainer(container.Id);
+                container.exec(options, function (err, exec) {
+                    if (err) {
+  //                      if (config.get("debug")) {
+                            console.log("Failed to get container " + container.Id);
+                            console.log(err);
+          //              }
+
+                        res.status(500);
+                        res.send(err);
+                        return;
+                    }
+                    if (config.get("debug"))
+                        console.log("Container stopped");
+
+                    exec.start(function(err,stream)
+                    {
+                      if (err) {
+    //                      if (config.get("debug")) {
+                              console.log("Failed to execute in container " + container.Id);
+                              console.log(err);
+        //                  }
+
+                          res.status(500);
+                          res.send(err);
+                          return;
+                      }
+			console.log("executed query");
+			const chunks = [];
+			stream.on("data", function (chunk) {
+    				chunks.push(chunk.toString());
+  			});
+			  // Send the buffer or you can put it into a var
+  			stream.on("end", function () {
+				// We remove the first 8 chars as the contain a unicode START OF HEADING followed by ENQUIRY.
+    				res.send(chunks.join('').substr(8));
+  			})
+
+        	      //stream.pipe(res);
+                      //return;
+                    });
+			return;
+                    //res.status(200);
+                    //res.send("no result returned");
+                });
+            }
         }, function (status, message) {
             if (config.get("debug"))
                 console.log("Failed to get status of Docker container");
