@@ -99,7 +99,7 @@ app.all('/container/:containerId', function (req, res) {
                         state: "stopped"
                     });
                 });
-            }            
+            }
         }, function (status, message) {
             if (config.get("debug"))
                 console.log("Failed to get status of Docker container");
@@ -164,6 +164,80 @@ app.get('/container/:containerId/restart', function (req, res) {
         }
     })
 });
+
+app.post('/container/:containerId/exec', function(req, res) {
+    var containerId = req.params.containerId;
+    console.log("Exec " + containerId);
+
+    var command = req.body.command ? req.body.command : false;
+    if (command == "" || !command) {
+        res.send({
+            status: false,
+            error: "No command specified"
+        });
+        res.status(400);
+        return;
+    }
+    
+    getContainer(containerId, function (container) {
+        if (config.get("debug"))
+            console.log("Attempting to execute command in container " + container.Id);
+        var options = {
+            Cmd: command.split(" "),
+            AttachStdout: true,
+            AttachStderr: true
+        };
+        if (config.get('debug'))
+            console.log(options);
+
+        var container = docker.getContainer(container.Id);
+        container.exec(options, function (err, exec) {
+            if (err) {
+                if (config.get("debug")) {
+                    console.log("Failed to get container " + container.Id);
+                    console.log(err);
+                }
+
+                res.status(500);
+                res.send(err);
+                return;
+            }
+
+            exec.start(function (err, stream) {
+                if (err) {
+                    if (config.get("debug")) {
+                        console.log("Failed to execute in container " + container.Id);
+                        console.log(err);
+                    }
+
+                    res.status(500);
+                    res.send(err);
+                    return;
+                }
+                console.log("executed query");
+                const chunks = [];
+                stream.on("data", function (chunk) {
+                    chunks.push(chunk.toString());
+                });
+
+                // Send the buffer or you can put it into a var
+                stream.on("end", function () {
+                    // We remove the first 8 chars as the contain a unicode START OF HEADING followed by ENQUIRY.
+                    res.send({
+                        status: true,
+                        result: chunks.join('').substr(8)
+                    });
+                });
+            });
+            return;
+        });
+    }, function (status, message) {
+        res.status(status);
+        if (message) {
+            res.send(message);
+        }
+    });
+})
 
 //Attempt to connect to the Docker daemon
 switch (config.get("docker_connection:type")) {
