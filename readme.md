@@ -47,10 +47,24 @@ The easiest way to get started is to run this service inside its own Docker cont
 ```bash
 docker run -d \
 --name=ha-dockermon --restart=always \
--v /var/run/docker.sock:/var/run/docker.sock
--v /path/to/config:/config
--p 8126:8126
+-v /var/run/docker.sock:/var/run/docker.sock \
+-v /path/to/config:/config \
+-p 8126:8126 \
 philhawthorne/ha-dockermon
+```
+
+#### Docker Compose
+If you prefer to use Docker Compose, here is a sample entry you can add to your Docker compose file.
+```yaml
+  docker_mon:
+    image: philhawthorne/ha-dockermon
+    container_name: ha_dockermon
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /path/to/config:/config
+    ports:
+      - 8126:8126
 ```
 
 #### NodeJS
