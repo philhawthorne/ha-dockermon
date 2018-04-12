@@ -141,6 +141,22 @@ app.all('/container/:containerId', function (req, res) {
 });
 
 /**
+ * List all of the containers
+ */
+app.get('/containers', function (req, res) {
+    docker.listContainers({ all: true }, function (err, containers) {
+        if (err) {
+            res.status(500);
+            res.send(err);
+            return;
+        }
+        res.status(200);
+        res.send(containers);
+    });
+});
+
+
+/**
  * Restart the container by the ID specified
  */
 app.get('/container/:containerId/restart', function (req, res) {
@@ -149,6 +165,58 @@ app.get('/container/:containerId/restart', function (req, res) {
 
     getContainer(containerId, function (container) {
         docker.getContainer(container.Id).restart(function (err, data) {
+            if (err) {
+                res.status(500);
+                res.send(err);
+                return;
+            }
+            res.status(200); //We found the container! This reponse can be trusted
+            res.send(data);
+        });
+    }, function (status, message) {
+        res.status(status);
+        if (message) {
+            res.send(message);
+        }
+    })
+});
+
+
+/**
+ * Start the container by the ID specified
+ */
+app.get('/container/:containerId/start', function (req, res) {
+    var containerId = req.params.containerId;
+    console.log("Start " + containerId);
+
+    getContainer(containerId, function (container) {
+        docker.getContainer(container.Id).start(function (err, data) {
+            if (err) {
+                res.status(500);
+                res.send(err);
+                return;
+            }
+            res.status(200); //We found the container! This reponse can be trusted
+            res.send(data);
+        });
+    }, function (status, message) {
+        res.status(status);
+        if (message) {
+            res.send(message);
+        }
+    })
+});
+
+
+/**
+ * Stop the container by the ID specified
+ */
+app.get('/container/:containerId/stop', function (req, res) {
+    var containerId = req.params.containerId;
+    console.log("Stop " + containerId);
+
+    getContainer(containerId, function (container) {
+        docker.getContainer(container.Id).stop(function (err, data) {
             if (err) {
                 res.status(500);
                 res.send(err);
@@ -178,7 +246,7 @@ app.post('/container/:containerId/exec', function(req, res) {
         res.status(400);
         return;
     }
-    
+
     getContainer(containerId, function (container) {
         if (config.get("debug"))
             console.log("Attempting to execute command in container " + container.Id);
@@ -283,14 +351,14 @@ function getContainer(name, cb, error)
         if (err) {
             if (typeof error == "function")
                 return error(500, err);
-            
+
             return;
         }
 
         if (containers.length < 1) {
             if (typeof error == "function")
                 return error(404, "container not found");
-            
+
             return;
         }
 
