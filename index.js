@@ -141,6 +141,22 @@ app.all('/container/:containerId', function (req, res) {
 });
 
 /**
+ * List all of the containers
+ */
+app.get('/containers', function (req, res) {
+    docker.listContainers({ all: true }, function (err, containers) {
+        if (err) {
+            res.status(500);
+            res.send(err);
+            return;
+        }
+        res.status(200);
+        res.send(containers);
+    });
+});
+
+
+/**
  * Restart the container by the ID specified
  */
 app.get('/container/:containerId/restart', function (req, res) {
