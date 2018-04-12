@@ -10,7 +10,9 @@ As of this release, you can:
 
 * Get the status of a container (running, stopped).
 * Start or stop a container by issuing a `POST` request.
+* Start or stop a container by issuing a `GET` requst.
 * Restart a container by making a `GET` request to a URL for the container (details below).
+* Execute commands inside a container using the `/exec` endpoint of a container.
 
 ## Getting Started
 
@@ -76,7 +78,7 @@ You can run this service directly from a host that has NPM and NodeJS installed.
 ## Using this service
 
 ### HTTP Endpoints
-This service exposes two HTTP endpoints
+This service exposes the following HTTP endpoints
 
 #### GET /container/{container name}
 
