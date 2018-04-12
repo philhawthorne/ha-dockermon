@@ -124,7 +124,77 @@ curl --request POST \
 --data '{"command": "ls -a"}'
 ```
 
+### GET /container/{container name}/start
+
+Allows you to send a simple HTTP request to start a Docker container.
+
 The response will be a json object with a `result` key containing the output from the command executed.
+
+*Warning:* There is no confirmation for the command to be executed. Going to the URL in your browser will start the container.
+
+### GET /container/{container name}/stop
+
+Allows you to send a simple HTTP request to stop a Docker container.
+
+The response will be a json object with a `result` key containing the output from the command executed.
+
+*Warning:* There is no confirmation for the command to be executed. Going to the URL in your browser will stop the container.
+
+### GET /containers
+
+Outputs a list of all stopped and started containers on the host.
+
+This is the same as performing a `docker ps -a` command on the host machine.
+
+The response will be a json object, with each container in its own key. An example response is below.
+
+```json
+[{
+	"Id": "2096eaf1a58f1730234d2e30c982021c196192eae9f41c6abf8fa26aad348477",
+	"Names": ["/hadockermon"],
+	"Image": "hadockermon",
+	"ImageID": "sha256:e7352295ec274a441f691a8c83f8823137654f5d4df5fb187d9f1cee1f4711d6",
+	"Command": "/bin/sh -c 'npm start'",
+	"Created": 1523522864,
+	"Ports": [{
+		"IP": "0.0.0.0",
+		"PrivatePort": 8126,
+		"PublicPort": 8126,
+		"Type": "tcp"
+	}],
+	"Labels": {},
+	"State": "running",
+	"Status": "Up 19 seconds",
+	"HostConfig": {
+		"NetworkMode": "default"
+	},
+	"NetworkSettings": {
+		"Networks": {
+			"bridge": {
+				"IPAMConfig": null,
+				"Links": null,
+				"Aliases": null,
+				"NetworkID": "ed342d9b95ab77f57172ca3fdd2dc87682ee7e0c3f94db7bb3a83ba81a5f2135",
+				"EndpointID": "bfdec2f98a2521093e1210c1cc5135e3a788be5b80b8409d8652915a5ee38224",
+				"Gateway": "172.17.0.1",
+				"IPAddress": "172.17.0.2",
+				"IPPrefixLen": 16,
+				"IPv6Gateway": "",
+				"GlobalIPv6Address": "",
+				"GlobalIPv6PrefixLen": 0,
+				"MacAddress": "02:42:ac:11:00:02"
+			}
+		}
+	},
+	"Mounts": [{
+		"Source": "/var/run/docker.sock",
+		"Destination": "/var/run/docker.sock",
+		"Mode": "",
+		"RW": true,
+		"Propagation": "rprivate"
+	}]
+}]
+```
 
 ### Home Assistant RESTful Switch
 
