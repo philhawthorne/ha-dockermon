@@ -209,6 +209,33 @@ app.get('/container/:containerId/start', function (req, res) {
 
 
 /**
+ * Stats the container by the ID specified
+ */
+app.get('/container/:containerId/stats', function (req, res) {
+    var containerId = req.params.containerId;
+    console.log("Stats " + containerId);
+    var opts= new Object();
+    opts.stream = false
+    getContainer(containerId, function (container) {
+        docker.getContainer(container.Id).stats(opts, function (err, data) {
+            if (err) {
+                res.status(500);
+                res.send(err);
+                return;
+            }
+            res.status(200); //We found the container! This reponse can be trusted
+            res.send(data);
+        });
+    }, function (status, message) {
+        res.status(status);
+        if (message) {
+            res.send(message);
+        }
+    })
+});
+
+
+/**
  * Stop the container by the ID specified
  */
 app.get('/container/:containerId/stop', function (req, res) {
