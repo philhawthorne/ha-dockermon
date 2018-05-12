@@ -134,6 +134,16 @@ The response will be a json object with a `result` key containing the output fro
 
 *Warning:* There is no confirmation for the command to be executed. Going to the URL in your browser will start the container.
 
+### GET /container/{container name}/stats
+
+Allows you to read various statistics of a running Docker container, including CPU usage and memory usage.
+
+The response will be a json object with various keys including `precpu_stats` `cpu_stats` and `memory_stats`. The information returned may vary on the version of Docker your host machine is running.
+
+*Heads Up:* There's a known issue where some host systems (like Synology NAS) may not return a response when calling this endpoint.
+
+Thanks to [@thelittlefireman](https://github.com/thelittlefireman) for contributing this endpoint.
+
 ### GET /container/{container name}/stop
 
 Allows you to send a simple HTTP request to stop a Docker container.
