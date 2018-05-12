@@ -213,7 +213,7 @@ app.get('/container/:containerId/start', function (req, res) {
  */
 app.get('/container/:containerId/stats', function (req, res) {
     var containerId = req.params.containerId;
-    console.log("Stats " + containerId);
+    console.log("Getting Stats for " + containerId);
     var opts= new Object();
     opts.stream = false
     getContainer(containerId, function (container) {
