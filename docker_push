@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Logging in to Docker"
+echo "Logging in to Docker as $DOCKER_USERNAME"
 echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 case "$1" in
     master )
