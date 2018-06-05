@@ -1,0 +1,15 @@
+sudo: required
+
+services:
+  - docker
+
+deploy:
+  - provider: script
+    script: bash docker_push master $TRAVIS_TAG
+    on:
+      branch: master
+  
+  - provider: script
+    script: bash docker_push edge
+    on:
+      branch: dev

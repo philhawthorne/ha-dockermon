@@ -1,0 +1,11 @@
+#!/bin/bash
+echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+case "$1" in
+    master )
+        echo "Nothing to do yet" ;;
+        
+    edge )
+        docker build -t philhawthorne/ha-dockermon:edge .
+        docker push philhawthorne/ha-dockermon:edge
+        ;;
+    esac
