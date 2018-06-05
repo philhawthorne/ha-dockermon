@@ -5,6 +5,7 @@ case "$1" in
         echo "Nothing to do yet" ;;
         
     edge )
+        echo "Tagging and pushing images as edge"
         docker build -t philhawthorne/ha-dockermon:edge .
         docker push philhawthorne/ha-dockermon:edge
         ;;
