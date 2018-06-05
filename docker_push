@@ -8,6 +8,8 @@ case "$1" in
     edge )
         echo "Tagging and pushing images as edge"
         docker build -t philhawthorne/ha-dockermon:edge .
+        docker build -t philhawthorne/ha-dockermon:edge-arm -f Dockerfile.RaspberryPi .
         docker push philhawthorne/ha-dockermon:edge
+        docker push philhawthorne/ha-dockermon:edge-arm
         ;;
     esac
