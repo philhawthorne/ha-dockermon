@@ -1,8 +1,6 @@
-FROM resin/rpi-raspbian
+FROM resin/raspberrypi3-node:8.0.0
 ENV config_dir=/config
-#Install NodeJS
-RUN curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-RUN sudo apt-get install -y nodejs
+
 RUN mkdir -p /usr/src/app && mkdir /config
 WORKDIR /usr/src/app
 
