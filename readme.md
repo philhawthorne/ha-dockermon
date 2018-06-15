@@ -226,7 +226,7 @@ switch:
 
 Thanks to [Joakim Sørensen (@ludeeus)](https://github.com/ludeeus) you can use a custom Home Assistant Component, which can automatically add switches to your Home Assistant instance from Dockermon.
 
-You can get the custom component [here](https://github.com/ludeeus/custom_component_hadockermon).
+You can get the custom component [here](https://gitlab.com/custom_components/hadockermon).
 
 # Further Reading
 For more in-depth Home Assistant examples and some ideas for use, please check out [this article on my blog](https://philhawthorne.com/ha-dockermon-use-home-assistant-to-monitor-start-or-stop-docker-containers).
