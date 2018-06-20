@@ -5,11 +5,22 @@ services:
 
 language: node_js
 
+branches:
+  only:
+  - master
+  - /^v.*$/
+  - dev
+
 deploy:
   - provider: script
-    script: bash docker_push master $TRAVIS_TAG
+    script: bash docker_push master
     on:
       branch: master
+  
+  - provider: script
+    script: bash docker_push $TRAVIS_TAG
+    on:
+      tags: true
   
   - provider: script
     script: bash docker_push edge
