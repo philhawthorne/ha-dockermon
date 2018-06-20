@@ -3,8 +3,12 @@ echo "Logging in to Docker as $DOCKER_USERNAME"
 echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 case "$1" in
     master )
-        echo "Nothing to do yet" ;;
-        
+        docker build -t philhawthorne/ha-dockermon:latest .
+        docker run --rm --privileged multiarch/qemu-user-static:register --reset
+        docker build -t philhawthorne/ha-dockermon:arm -f Dockerfile.RaspberryPi .
+        docker push philhawthorne/ha-dockermon:latest
+        docker push philhawthorne/ha-dockermon:arm
+        ;;
     edge )
         echo "Tagging and pushing images as edge"
         docker build -t philhawthorne/ha-dockermon:edge .
@@ -13,5 +17,14 @@ case "$1" in
         docker build -t philhawthorne/ha-dockermon:edge-arm -f Dockerfile.RaspberryPi .
         docker push philhawthorne/ha-dockermon:edge
         docker push philhawthorne/ha-dockermon:edge-arm
+        ;;
+    *)
+        echo "Tagging release $1"
+        docker build -t philhawthorne/ha-dockermon:"$1" .
+        # prepare qemu
+        docker run --rm --privileged multiarch/qemu-user-static:register --reset
+        docker build -t philhawthorne/ha-dockermon:edge-arm -f Dockerfile.RaspberryPi .
+        docker push philhawthorne/ha-dockermon:"$1"
+        docker push philhawthorne/ha-dockermon:"$1"-arm
         ;;
     esac
