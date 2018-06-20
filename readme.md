@@ -1,7 +1,7 @@
 HA Dockermon
 ============
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/philhawthorne/ha-dockermon.svg)](https://dockerhub.com/philhawthorne/ha-dockermon) [![Docker Automated build](https://img.shields.io/docker/automated/philhawthorne/ha-dockermon.svg)](https://dockerhub.com/philhawthorne/ha-dockermon) [![license](https://img.shields.io/github/license/philhawthorne/ha-dockermon.svg)](https://dockerhub.com/philhawthorne/ha-dockermon)
+[![Docker Pulls](https://img.shields.io/docker/pulls/philhawthorne/ha-dockermon.svg)](https://dockerhub.com/philhawthorne/ha-dockermon) [![Build Status](https://travis-ci.org/philhawthorne/ha-dockermon.svg?branch=master)](https://travis-ci.org/philhawthorne/ha-dockermon) [![license](https://img.shields.io/github/license/philhawthorne/ha-dockermon.svg)](https://dockerhub.com/philhawthorne/ha-dockermon)
 
 This is a simple Node service which checks the status of a Docker Container and returns a RESTful response. It can also be used to issue `start` `stop` and `restart` commands. The primary purpose of this service is to interface with [Home Assistant](https://home-assistant.io) on a [Synology NAS](http://amzn.to/2FAC28A).
 
@@ -74,6 +74,19 @@ You can run this service directly from a host that has NPM and NodeJS installed.
 
     npm start
 
+## Raspberry Pi and other versions
+A Raspberry Pi image is available if you wish to use this on a pi. Simply use the `arm` tag, for example:
+
+```bash
+docker run -d \
+--name=ha-dockermon --restart=always \
+-v /var/run/docker.sock:/var/run/docker.sock \
+-v /path/to/config:/config \
+-p 8126:8126 \
+philhawthorne/ha-dockermon:arm
+```
+
+You may also use an older version. Check [Docker Hub](https://hub.docker.com/r/philhawthorne/ha-dockermon/tags/) for the list of tags you may use.
 
 ## Using this service
 
