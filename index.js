@@ -389,6 +389,25 @@ function getContainer(name, cb, error)
             return;
         }
 
-        return cb(containers[0]);
+        //What is the ID of this container?
+        //We need to only return the ID as it matches exactly
+        for(id in containers) {
+            //Does this container have names set?
+            if (containers[id].Names.length) {
+                //Yes it does, check the first name
+                if (containers[id].Names[0] == "/" + name) {
+                    //Found it by name!
+                    return cb(containers[id]);
+                }
+            }
+            if (containers[id].Id !== name)
+                continue; //Hmm name or ID doesn't match
+            
+            //Found it!
+            return cb(containers[id]);
+        }
+
+        //Could not find that container - sad face
+        return false;
     });
 }
