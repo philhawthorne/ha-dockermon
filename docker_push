@@ -23,7 +23,7 @@ case "$1" in
         docker build -t philhawthorne/ha-dockermon:"$1" .
         # prepare qemu
         docker run --rm --privileged multiarch/qemu-user-static:register --reset
-        docker build -t philhawthorne/ha-dockermon:edge-arm -f Dockerfile.RaspberryPi .
+        docker build -t philhawthorne/ha-dockermon:"$1"-arm -f Dockerfile.RaspberryPi .
         docker push philhawthorne/ha-dockermon:"$1"
         docker push philhawthorne/ha-dockermon:"$1"-arm
         ;;
