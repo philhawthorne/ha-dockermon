@@ -374,17 +374,10 @@ function startServer(docker)
 
 function getContainer(name, cb, error)
 {
-    docker.listContainers({ limit: 1, filters: { "name": [name] } }, function (err, containers) {
+    docker.listContainers({ filters: { "name": [name] } }, function (err, containers) {
         if (err) {
             if (typeof error == "function")
                 return error(500, err);
-
-            return;
-        }
-
-        if (containers.length < 1) {
-            if (typeof error == "function")
-                return error(404, "container not found");
 
             return;
         }
@@ -400,14 +393,42 @@ function getContainer(name, cb, error)
                     return cb(containers[id]);
                 }
             }
-            if (containers[id].Id !== name)
-                continue; //Hmm name or ID doesn't match
-            
-            //Found it!
-            return cb(containers[id]);
         }
 
-        //Could not find that container - sad face
-        return false;
+        //Hmm lets try get the container by ID instead
+        docker.listContainers({ filters: { "id": [name] } }, function (err, containers) {
+            if (err) {
+                if (typeof error == "function")
+                    return error(500, err);
+    
+                return;
+            }
+    
+            if (containers.length < 1) {
+                if (typeof error == "function")
+                    return error(404, "container not found");
+                
+                return;
+            }
+    
+            //What is the ID of this container?
+            //We need to only return the ID as it matches exactly
+            for(id in containers) {
+                //Does this container have names set?
+                if (containers[id].Names.length) {
+                    //Yes it does, check the first name
+                    if (containers[id].Id == name) {
+                        //Found it by name!
+                        return cb(containers[id]);
+                    }
+                }
+            }
+
+            //Could not find that container - sad face
+            if (typeof error == "function")
+                return error(404, "container not found");
+            
+            return false;
+        });
     });
 }
