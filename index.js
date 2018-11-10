@@ -207,6 +207,55 @@ app.get('/container/:containerId/start', function (req, res) {
     })
 });
 
+/**
+ * Pause the container by the ID specified
+ */
+app.get('/container/:containerId/pause', function (req, res) {
+    var containerId = req.params.containerId;
+    console.log("Pause " + containerId);
+
+    getContainer(containerId, function (container) {
+        docker.getContainer(container.Id).pause(function (err, data) {
+            if (err) {
+                res.status(500);
+                res.send(err);
+                return;
+            }
+            res.status(200); //We found the container! This reponse can be trusted
+            res.send(data);
+        });
+    }, function (status, message) {
+        res.status(status);
+        if (message) {
+            res.send(message);
+        }
+    })
+});
+
+/**
+ * Unpause the container by the ID specified
+ */
+app.get('/container/:containerId/unpause', function (req, res) {
+    var containerId = req.params.containerId;
+    console.log("Unpause " + containerId);
+
+    getContainer(containerId, function (container) {
+        docker.getContainer(container.Id).unpause(function (err, data) {
+            if (err) {
+                res.status(500);
+                res.send(err);
+                return;
+            }
+            res.status(200); //We found the container! This reponse can be trusted
+            res.send(data);
+        });
+    }, function (status, message) {
+        res.status(status);
+        if (message) {
+            res.send(message);
+        }
+    })
+});
 
 /**
  * Stats the container by the ID specified
