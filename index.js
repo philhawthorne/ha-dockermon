@@ -99,7 +99,53 @@ app.all('/container/:containerId', function (req, res) {
                         state: "stopped"
                     });
                 });
-            }
+            } else if (req.body.state == "pause") {
+                if (config.get("debug"))
+                    console.log("Attempting to pause container " + container.Id);
+
+                docker.getContainer(container.Id).pause(function (err, data) {
+                    if (err) {
+                        if (config.get("debug")) {
+                            console.log("Failed to pause container " + container.Id);
+                            console.log(err);
+                        }
+
+                        res.status(500);
+                        res.send(err);
+                        return;
+                    }
+                    if (config.get("debug"))
+                        console.log("Container paused");
+
+                    res.status(200); //We found the container! This reponse can be trusted
+                    res.send({
+                        state: "paused"
+                    });
+                });
+             } else if (req.body.state == "unpause") {
+                if (config.get("debug"))
+                    console.log("Attempting to unpause container " + container.Id);
+
+                docker.getContainer(container.Id).unpause(function (err, data) {
+                    if (err) {
+                        if (config.get("debug")) {
+                            console.log("Failed to unpause container " + container.Id);
+                            console.log(err);
+                        }
+
+                        res.status(500);
+                        res.send(err);
+                        return;
+                    }
+                    if (config.get("debug"))
+                        console.log("Container unpaused");
+
+                    res.status(200); //We found the container! This reponse can be trusted
+                    res.send({
+                        state: "running"
+                    });
+                });
+             }
         }, function (status, message) {
             if (config.get("debug"))
                 console.log("Failed to get status of Docker container");
