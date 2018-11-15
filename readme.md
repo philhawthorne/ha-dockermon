@@ -171,7 +171,7 @@ Allows you to send a simple HTTP request to pause a Docker container.
 
 The response will be a json object with a `result` key containing the output from the command executed.
 
-*Warning:* There is no confirmation for the command to be executed. Going to the URL in your browser will stop the container.
+*Warning:* There is no confirmation for the command to be executed. Going to the URL in your browser will pause the container.
 
 ### GET /container/{container name}/unpause
 
@@ -179,11 +179,11 @@ Allows you to send a simple HTTP request to unpause a Docker container.
 
 The response will be a json object with a `result` key containing the output from the command executed.
 
-*Warning:* There is no confirmation for the command to be executed. Going to the URL in your browser will stop the container.
+*Warning:* There is no confirmation for the command to be executed. Going to the URL in your browser will unpause the container.
 
 ### GET /containers
 
-Outputs a list of all stopped and started containers on the host.
+Outputs a list of all stopped, started, and paused containers on the host.
 
 This is the same as performing a `docker ps -a` command on the host machine.
 
@@ -249,9 +249,15 @@ switch:
     body_on: '{"state": "start"}'
     body_off: '{"state": "stop"}'
     is_on_template: '{{ value_json is not none and value_json.state == "running" }}'
+    
+switch:
+  - platform: rest
+    resource: http://127.0.0.1:8126/container/mosquitto
+    name: Mosquitto
+    body_on: '{"state": "unpause"}'
+    body_off: '{"state": "pause"}'
+    is_on_template: '{{ value_json is not none and value_json.state == "running" }}'
 ```
-This same example will work with unpause and pause in place of start and stop.
-
 ### Home Assistant Custom Component
 
 Thanks to [Joakim Sørensen (@ludeeus)](https://github.com/ludeeus) you can use a custom Home Assistant Component, which can automatically add switches to your Home Assistant instance from Dockermon.
