@@ -483,10 +483,12 @@ function getContainer(name, cb, error)
             for(id in containers) {
                 //Does this container have names set?
                 if (containers[id].Names.length) {
-                    //Yes it does, check the first name
-                    if (containers[id].Names[0] == "/" + name) {
-                        //Found it by name!
-                        return cb(containers[id]);
+                    //Yes it does, loop over all names to see if we get one
+                    for(i in containers[id].Names) {
+                        if (containers[id].Names[i] == "/" + name) {
+                            //Found it by name!
+                            return cb(containers[id]);
+                        }
                     }
                 }
             }
