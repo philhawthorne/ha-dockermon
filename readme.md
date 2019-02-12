@@ -3,6 +3,9 @@ HA Dockermon
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/philhawthorne/ha-dockermon.svg)](https://dockerhub.com/philhawthorne/ha-dockermon) [![Build Status](https://travis-ci.org/philhawthorne/ha-dockermon.svg?branch=master)](https://travis-ci.org/philhawthorne/ha-dockermon) [![license](https://img.shields.io/github/license/philhawthorne/ha-dockermon.svg)](https://dockerhub.com/philhawthorne/ha-dockermon)
 
+[![Buy me a coffee][buymeacoffee-icon]][buymeacoffee]
+
+
 This is a simple Node service which checks the status of a Docker Container and returns a RESTful response. It can also be used to issue `start` `stop` `pause` `unpause` and `restart` commands. The primary purpose of this service is to interface with [Home Assistant](https://home-assistant.io) on a [Synology NAS](http://amzn.to/2FAC28A).
 
 ## Supported Features
@@ -260,3 +263,6 @@ You can get the custom component [here](https://gitlab.com/custom_components/had
 
 # Further Reading
 For more in-depth Home Assistant examples and some ideas for use, please check out [this article on my blog](https://philhawthorne.com/ha-dockermon-use-home-assistant-to-monitor-start-or-stop-docker-containers).
+
+[buymeacoffee-icon]: https://www.buymeacoffee.com/assets/img/guidelines/download-assets-sm-2.svg
+[buymeacoffee]: https://www.buymeacoffee.com/philhawthorne
