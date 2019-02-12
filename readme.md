@@ -3,14 +3,17 @@ HA Dockermon
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/philhawthorne/ha-dockermon.svg)](https://dockerhub.com/philhawthorne/ha-dockermon) [![Build Status](https://travis-ci.org/philhawthorne/ha-dockermon.svg?branch=master)](https://travis-ci.org/philhawthorne/ha-dockermon) [![license](https://img.shields.io/github/license/philhawthorne/ha-dockermon.svg)](https://dockerhub.com/philhawthorne/ha-dockermon)
 
-This is a simple Node service which checks the status of a Docker Container and returns a RESTful response. It can also be used to issue `start` `stop` and `restart` commands. The primary purpose of this service is to interface with [Home Assistant](https://home-assistant.io) on a [Synology NAS](http://amzn.to/2FAC28A).
+[![Buy me a coffee][buymeacoffee-icon]][buymeacoffee]
+
+
+This is a simple Node service which checks the status of a Docker Container and returns a RESTful response. It can also be used to issue `start` `stop` `pause` `unpause` and `restart` commands. The primary purpose of this service is to interface with [Home Assistant](https://home-assistant.io) on a [Synology NAS](http://amzn.to/2FAC28A).
 
 ## Supported Features
 As of this release, you can:
 
-* Get the status of a container (running, stopped).
-* Start or stop a container by issuing a `POST` request.
-* Start or stop a container by issuing a `GET` requst.
+* Get the status of a container (running, stopped, paused).
+* Start, stop, pause, or unpause a container by issuing a `POST` request.
+* Start, stop, pause, or unpause a container by issuing a `GET` requst.
 * Restart a container by making a `GET` request to a URL for the container (details below).
 * Execute commands inside a container using the `/exec` endpoint of a container.
 
@@ -109,7 +112,7 @@ Use this endpoint to get the status of a container, for example, you may make a 
 
 Use the same endpoint with `POST` to start or stop a container. When making a call to this endpoint you must send the correct `Content-Type` headers and JSON as the body. An example request with cURL is below.
 
-Valid options for `state` are `start` and `stop` to start or stop a container respectively.
+Valid options for `state` are `start`, `stop`, `pause`, and `unpause` to start, stop, pause, or unpause a container respectively.
 
 ```bash
 curl --request POST \
@@ -165,9 +168,25 @@ The response will be a json object with a `result` key containing the output fro
 
 *Warning:* There is no confirmation for the command to be executed. Going to the URL in your browser will stop the container.
 
+### GET /container/{container name}/pause
+
+Allows you to send a simple HTTP request to pause a Docker container.
+
+The response will be a json object with a `result` key containing the output from the command executed.
+
+*Warning:* There is no confirmation for the command to be executed. Going to the URL in your browser will pause the container.
+
+### GET /container/{container name}/unpause
+
+Allows you to send a simple HTTP request to unpause a Docker container.
+
+The response will be a json object with a `result` key containing the output from the command executed.
+
+*Warning:* There is no confirmation for the command to be executed. Going to the URL in your browser will unpause the container.
+
 ### GET /containers
 
-Outputs a list of all stopped and started containers on the host.
+Outputs a list of all stopped, started, and paused containers on the host.
 
 This is the same as performing a `docker ps -a` command on the host machine.
 
@@ -233,8 +252,15 @@ switch:
     body_on: '{"state": "start"}'
     body_off: '{"state": "stop"}'
     is_on_template: '{{ value_json is not none and value_json.state == "running" }}'
+    
+switch:
+  - platform: rest
+    resource: http://127.0.0.1:8126/container/mosquitto
+    name: Mosquitto
+    body_on: '{"state": "unpause"}'
+    body_off: '{"state": "pause"}'
+    is_on_template: '{{ value_json is not none and value_json.state == "running" }}'
 ```
-
 ### Home Assistant Custom Component
 
 Thanks to [Joakim Sørensen (@ludeeus)](https://github.com/ludeeus) you can use a custom Home Assistant Component, which can automatically add switches to your Home Assistant instance from Dockermon.
@@ -243,3 +269,6 @@ You can get the custom component [here](https://gitlab.com/custom_components/had
 
 # Further Reading
 For more in-depth Home Assistant examples and some ideas for use, please check out [this article on my blog](https://philhawthorne.com/ha-dockermon-use-home-assistant-to-monitor-start-or-stop-docker-containers).
+
+[buymeacoffee-icon]: https://www.buymeacoffee.com/assets/img/guidelines/download-assets-sm-2.svg
+[buymeacoffee]: https://www.buymeacoffee.com/philhawthorne

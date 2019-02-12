@@ -99,7 +99,53 @@ app.all('/container/:containerId', function (req, res) {
                         state: "stopped"
                     });
                 });
-            }
+            } else if (req.body.state == "pause") {
+                if (config.get("debug"))
+                    console.log("Attempting to pause container " + container.Id);
+
+                docker.getContainer(container.Id).pause(function (err, data) {
+                    if (err) {
+                        if (config.get("debug")) {
+                            console.log("Failed to pause container " + container.Id);
+                            console.log(err);
+                        }
+
+                        res.status(500);
+                        res.send(err);
+                        return;
+                    }
+                    if (config.get("debug"))
+                        console.log("Container paused");
+
+                    res.status(200); //We found the container! This reponse can be trusted
+                    res.send({
+                        state: "paused"
+                    });
+                });
+             } else if (req.body.state == "unpause") {
+                if (config.get("debug"))
+                    console.log("Attempting to unpause container " + container.Id);
+
+                docker.getContainer(container.Id).unpause(function (err, data) {
+                    if (err) {
+                        if (config.get("debug")) {
+                            console.log("Failed to unpause container " + container.Id);
+                            console.log(err);
+                        }
+
+                        res.status(500);
+                        res.send(err);
+                        return;
+                    }
+                    if (config.get("debug"))
+                        console.log("Container unpaused");
+
+                    res.status(200); //We found the container! This reponse can be trusted
+                    res.send({
+                        state: "running"
+                    });
+                });
+             }
         }, function (status, message) {
             if (config.get("debug"))
                 console.log("Failed to get status of Docker container");
@@ -207,6 +253,55 @@ app.get('/container/:containerId/start', function (req, res) {
     })
 });
 
+/**
+ * Pause the container by the ID specified
+ */
+app.get('/container/:containerId/pause', function (req, res) {
+    var containerId = req.params.containerId;
+    console.log("Pause " + containerId);
+
+    getContainer(containerId, function (container) {
+        docker.getContainer(container.Id).pause(function (err, data) {
+            if (err) {
+                res.status(500);
+                res.send(err);
+                return;
+            }
+            res.status(200); //We found the container! This reponse can be trusted
+            res.send(data);
+        });
+    }, function (status, message) {
+        res.status(status);
+        if (message) {
+            res.send(message);
+        }
+    })
+});
+
+/**
+ * Unpause the container by the ID specified
+ */
+app.get('/container/:containerId/unpause', function (req, res) {
+    var containerId = req.params.containerId;
+    console.log("Unpause " + containerId);
+
+    getContainer(containerId, function (container) {
+        docker.getContainer(container.Id).unpause(function (err, data) {
+            if (err) {
+                res.status(500);
+                res.send(err);
+                return;
+            }
+            res.status(200); //We found the container! This reponse can be trusted
+            res.send(data);
+        });
+    }, function (status, message) {
+        res.status(status);
+        if (message) {
+            res.send(message);
+        }
+    })
+});
 
 /**
  * Stats the container by the ID specified
@@ -388,10 +483,12 @@ function getContainer(name, cb, error)
             for(id in containers) {
                 //Does this container have names set?
                 if (containers[id].Names.length) {
-                    //Yes it does, check the first name
-                    if (containers[id].Names[0] == "/" + name) {
-                        //Found it by name!
-                        return cb(containers[id]);
+                    //Yes it does, loop over all names to see if we get one
+                    for(i in containers[id].Names) {
+                        if (containers[id].Names[i] == "/" + name) {
+                            //Found it by name!
+                            return cb(containers[id]);
+                        }
                     }
                 }
             }
