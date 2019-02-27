@@ -433,8 +433,8 @@ app.post('/container/:containerId/exec', function(req, res) {
 /**
  * Pull the lastest image for the given repository, with or without tag
  */
-app.get('/pull/:repoTag', function (req, res) {
-    var repoTag = req.params.repoTag;
+app.get('/pull/*', function (req, res) {
+    var repoTag = req.params[0];
     console.log("Pull" + repoTag);
     docker.pull(repoTag, function (err, stream) {
         if (err) {
