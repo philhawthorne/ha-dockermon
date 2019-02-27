@@ -4,6 +4,7 @@ var bodyParser = require('body-parser');
 var Docker = require('dockerode');
 var yaml = require("node-yaml");
 var fs = require('fs');
+var http = require('http');
 var Config = require('merge-config');
 var config = new Config();
 var docker = false;
@@ -465,6 +466,51 @@ app.get('/pull/*', function (req, res) {
 });
 
 
+/**
+ * Pull the latest image for the given repository/tag.
+ * When the pull is complete, notify the provided callback_uri of success or failure.
+ */
+app.post('/pull/*', function (req, res) {
+    var repoTag = req.params[0];
+    console.log("Pull" + repoTag + "asynchronously");
+    var callback = req.body.callback_uri ? req.body.callback_uri : false;
+    if (callback == "" || !callback) {
+        res.send({
+            status: false,
+            error: "No callback_uri specified. Use GET /pull/* to pull without a callback."
+        });
+        res.status(400);
+        return;
+    } else {
+        res.send({
+            status: true,
+            result: "Started pulling " + repoTag
+        })
+    }
+    docker.pull(repoTag, function (err, stream) {
+        if (err) {
+            if (config.get("debug")) {
+                console.log("Failed to pull docker image " + repoTag);
+                console.log(err);
+            }
+            var data = { status: false, error: `Failed to pull docker image ${repoTag}` };
+            postCallbackRequest(callback, data);
+            return;
+        }
+        console.log("Pulling image " + repoTag);
+        const chunks = [];
+        stream.on("data", function (chunk) {
+            chunks.push(chunk.toString());
+        });
+
+        stream.on("end", function () {
+            var data = { status: true, result: `Finished pulling docker image ${repoTag}` }
+            postCallbackRequest(callback, data)
+        });
+    });
+});
+
+
 //Attempt to connect to the Docker daemon
 switch (config.get("docker_connection:type")) {
     case "http":
@@ -566,4 +612,17 @@ function getContainer(name, cb, error)
             return false;
         });
     });
+}
+
+function postCallbackRequest(url, data)
+{
+    var reqOpts = { method: 'POST', headers: { 'content-type': 'application/json' } };
+    var req = http.request(url, reqOpts, function (res) {
+        res.on('end', function () { console.log(`Message sent to callback uri: ${data}`) });
+    });
+    req.on('error', function (err) {
+        console.error(`Error sending POST request to callback URI: ${err.message}`);
+    });
+    req.write(JSON.stringify(data));
+    req.end();
 }
