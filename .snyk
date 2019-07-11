@@ -16,3 +16,21 @@ patch:
         patched: '2019-07-04T00:48:53.100Z'
     - node-yaml > promise-fs > @octetstream/eslint-config > babel-eslint > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash:
         patched: '2019-07-04T00:48:53.100Z'
+    - snyk > lodash:
+        patched: '2019-07-11T03:44:49.251Z'
+    - snyk > snyk-nuget-plugin > lodash:
+        patched: '2019-07-11T03:44:49.251Z'
+    - snyk > snyk-nodejs-lockfile-parser > lodash:
+        patched: '2019-07-11T03:44:49.251Z'
+    - snyk > snyk-config > lodash:
+        patched: '2019-07-11T03:44:49.251Z'
+    - snyk > inquirer > lodash:
+        patched: '2019-07-11T03:44:49.251Z'
+    - snyk > @snyk/dep-graph > lodash:
+        patched: '2019-07-11T03:44:49.251Z'
+    - snyk > snyk-go-plugin > graphlib > lodash:
+        patched: '2019-07-11T03:44:49.251Z'
+    - snyk > @snyk/dep-graph > graphlib > lodash:
+        patched: '2019-07-11T03:44:49.251Z'
+    - snyk > snyk-nodejs-lockfile-parser > graphlib > lodash:
+        patched: '2019-07-11T03:44:49.251Z'
