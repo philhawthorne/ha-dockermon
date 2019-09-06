@@ -7,6 +7,6 @@ COPY package.json /usr/src/app
 COPY .snyk /usr/src/app
 RUN npm install
 
-COPY default_settings.json /usr/src/app
+COPY default_settings.js /usr/src/app
 COPY index.js /usr/src/app
 CMD npm start
