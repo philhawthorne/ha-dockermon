@@ -1,5 +1,6 @@
 var convict = require('convict');
     yaml = require('js-yaml');
+    fs = require('fs');
 
 var config = convict({
   debug: {
@@ -16,12 +17,12 @@ var config = convict({
       username: {
           doc: 'Optional. The HTTP Username for authentication',
           format: String,
-          default: ''
+          default: undefined
       }, 
       password: {
         doc: 'Optional. The HTTP Password for authentication',
         format: String,
-        default: '',
+        default: undefined,
         sensitive: true
     }
   },
@@ -37,13 +38,14 @@ var config = convict({
       default: '/var/run/docker.sock'
     },
     host: {
-      doc: 'URL to remote docker host',
+      doc: 'Optional. URL to remote docker host',
       format: String,
-      default: ''
+      default: undefined
     },
     port: {
-      doc: 'Port on remote docker host',
-      format: 'port_or_windows_named_pipe'
+      doc: 'Optional. Port on remote docker host',
+      format: 'port_or_windows_named_pipe',
+      default: undefined
     }
   }
 });
@@ -52,7 +54,15 @@ var config = convict({
 convict.addParser({ extension: ['yml', 'yaml'], parse: yaml.safeLoad });
 var config_dir = process.env.config_dir || "./config";
 console.log("Loading settings from " + config_dir);
-config.loadFile(config_dir + '/configuration.yaml');
+
+//Check if the configuration file exists, if it doesn't then skip this
+try{
+  if (fs.existsSync(config_dir + '/configuration.yaml')) {
+    config.loadFile(config_dir + '/configuration.yaml');
+  }
+} catch(err) {
+  console.warn("No configuration file detected. Using default settings");
+}
 
 // Perform validation
 config.validate({allowed: 'warn'});

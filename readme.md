@@ -25,13 +25,13 @@ You can change some configuration options for this service by editing config/con
 | Option                 | Description                                                                                                      | Default Value        |
 |------------------------|------------------------------------------------------------------------------------------------------------------|----------------------|
 | debug                  | If set to true, will output some helpful debug messages to the console.                                          | false                |
-| http.port              | The HTTP port the service listens on.                                                                            | 8126                 |
-| http.username          | If set all calls to this service must use HTTP basic authentication with this username.                          | None                 |
-| http.password          | If set all calls to this service must use HTTP basic authentication with this password.                          | None                 |
+| http.port              | The HTTP port the service listens on. Must be a valid HTTP port or windows socket.                                                                          | 8126                 |
+| http.username          | If set all calls to this service must use HTTP basic authentication with this username. **If set, must not be an empty value.**                         | None                 |
+| http.password          | If set all calls to this service must use HTTP basic authentication with this password. **If set, must not be an empty value.**                         | None                 |
 | docker_connection.type | How the service connects to docker. Valid options are socket or http                                             | socket               |
 | docker_connection.path | The path to the Docker socket. Useful when running this service on the host directly (not in a Docker container) | /var/run/docker.sock |
-| docker_connection.host | The host IP/Domain of the host Docker to connect to. Only used when docker_connection.type is set to http        | None                 |
-| docker_connection.port | The port of the host Docker to connect to. Only used when docker_connection.type is set to http                  | None                 |
+| docker_connection.host | The host IP/Domain of the host Docker to connect to. Only used when `docker_connection.type` is set to `http`. If `docker_connection.type` is set to `http` do not add this to your configuration YAML.         | None                 |
+| docker_connection.port | The port of the host Docker to connect to. Only used when `docker_connection.type` is set to `http`.  If `docker_connection.type` is set to `http` do not add this to your configuration YAML.                  | None                 |
 
 ### Connecting to Docker
 
