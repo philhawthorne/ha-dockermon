@@ -47,6 +47,56 @@ var config = convict({
       format: 'port_or_windows_named_pipe',
       default: undefined
     }
+  },
+  mqtt: {
+    enabled: {
+      doc: 'Whether MQTT should be enabled or not',
+      format: Boolean,
+      default: false
+    },
+    host: {
+      doc: 'MQTT server host',
+      format: String,
+      default: '127.0.0.1'
+    },
+    port: {
+      doc: 'Optional. Port for MQTT server',
+      format: 'port_or_windows_named_pipe',
+      default: undefined
+    },
+    username: {
+      doc: 'Optional. The HTTP Username for authentication',
+      format: String,
+      default: undefined
+    }, 
+    password: {
+      doc: 'Optional. The HTTP Password for authentication',
+      format: String,
+      default: undefined,
+      sensitive: true
+    },
+    base_topic: {
+      doc: 'MQTT base topic to send updates. Should be unique per HA-Dockermon instance, ie ha_dockermon/hostname',
+      format: String,
+      default: 'ha_dockermon'
+    },
+    scan_interval: {
+      doc: 'Number of seconds HA-Dockermon will scan the docker host for updates',
+      format: 'int',
+      default: 30
+    },
+    hass_discovery: {
+      enabled: {
+        doc: 'Whether HA-Dockermon should send Home Assistant Discovery entities',
+        format: Boolean,
+        default: true
+      },
+      base_topic: {
+        doc: 'The base topic Home Assistant listens for new devices',
+        format: String,
+        default: 'homeassistant'
+      }
+    }
   }
 });
 

@@ -22,16 +22,25 @@ As of this release, you can:
 ### Configuration Options
 You can change some configuration options for this service by editing config/configuration.yaml.
 
-| Option                 | Description                                                                                                      | Default Value        |
-|------------------------|------------------------------------------------------------------------------------------------------------------|----------------------|
-| debug                  | If set to true, will output some helpful debug messages to the console.                                          | false                |
-| http.port              | The HTTP port the service listens on. Must be a valid HTTP port or windows socket.                                                                          | 8126                 |
-| http.username          | If set all calls to this service must use HTTP basic authentication with this username. **If set, must not be an empty value.**                         | None                 |
-| http.password          | If set all calls to this service must use HTTP basic authentication with this password. **If set, must not be an empty value.**                         | None                 |
-| docker_connection.type | How the service connects to docker. Valid options are socket or http                                             | socket               |
-| docker_connection.path | The path to the Docker socket. Useful when running this service on the host directly (not in a Docker container) | /var/run/docker.sock |
-| docker_connection.host | The host IP/Domain of the host Docker to connect to. Only used when `docker_connection.type` is set to `http`. **If set, must not be an empty value.**         | None                 |
-| docker_connection.port | The port of the host Docker to connect to. Only used when `docker_connection.type` is set to `http`.  **If set, must not be an empty value.**                  | None                 |
+| Option                        | Description                                                                                                                                            | Default Value        |
+|-------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------|
+| debug                         | If set to true, will output some helpful debug messages to the console.                                                                                | false                |
+| http.port                     | The HTTP port the service listens on. Must be a valid HTTP port or windows socket.                                                                     | 8126                 |
+| http.username                 | If set all calls to this service must use HTTP basic authentication with this username. **If set, must not be an empty value.**                        | None                 |
+| http.password                 | If set all calls to this service must use HTTP basic authentication with this password. **If set, must not be an empty value.**                        | None                 |
+| docker_connection.type        | How the service connects to docker. Valid options are socket or http                                                                                   | socket               |
+| docker_connection.path        | The path to the Docker socket. Useful when running this service on the host directly (not in a Docker container)                                       | /var/run/docker.sock |
+| docker_connection.host        | The host IP/Domain of the host Docker to connect to. Only used when `docker_connection.type` is set to `http`. **If set, must not be an empty value.** | None                 |
+| docker_connection.port        | The port of the host Docker to connect to. Only used when `docker_connection.type` is set to `http`.  **If set, must not be an empty value.**          | None                 |
+| mqtt.enabled                  | Whether MQTT should be enabled or not                                                                                                                  | false                |
+| mqtt.host                     | MQTT broker host                                                                                                                                       | 127.0.0.1            |
+| mqtt.port                     | MQTT broker port                                                                                                                                       |                      |
+| mqtt.username                 | Optional. MQTT username to connect to the MQTT broker                                                                                                  |                      |
+| mqtt.password                 | Optional. MQTT password to connect to the MQTT broker                                                                                                  |                      |
+| mqtt.base_topic               | MQTT base topic to send updates. Should be unique per HA-Dockermon instance, ie ha_dockermon/hostname                                                  | ha_dockermon         |
+| mqtt.scan_interval            | Number of seconds HA-Dockermon will scan the docker host for updates                                                                                   | 30                   |
+| mqtt.hass_discovery.enabled   | Whether HA-Dockermon should send Home Assistant Discovery entities                                                                                     | true                 |
+| mqtt.hass_disovery.base_topic | The base topic Home Assistant listens for new devices                                                                                                  | homeassistant        |
 
 ### Connecting to Docker
 
@@ -91,12 +100,13 @@ philhawthorne/ha-dockermon:arm
 
 You may also use an older version. Check [Docker Hub](https://hub.docker.com/r/philhawthorne/ha-dockermon/tags/) for the list of tags you may use.
 
-## Using this service
+# Using this service
 
-### HTTP Endpoints
+## HTTP / REST API
+
 This service exposes the following HTTP endpoints
 
-#### GET /container/{container name}
+### GET /container/{container name}
 
 Use this endpoint to get the status of a container, for example, you may make a call to `http://127.0.0.1:8126/container/home-assistant`. The response will be a JSON object in the format below.
 
@@ -108,7 +118,7 @@ Use this endpoint to get the status of a container, for example, you may make a 
 }
 ```
 
-#### POST /container/{container name}
+### POST /container/{container name}
 
 Use the same endpoint with `POST` to start or stop a container. When making a call to this endpoint you must send the correct `Content-Type` headers and JSON as the body. An example request with cURL is below.
 
@@ -123,13 +133,13 @@ curl --request POST \
 
 The response will be the same format as the `GET` call above.
 
-#### GET /container/{container name}/restart
+### GET /container/{container name}/restart
 
 Calls to this URL will issue a `docker restart <container name>` on the host machine. There is currently no response from the API to this request.
 
 Useful in a Home Assistant script to restart containers (including Home Assistant itself).
 
-#### POST /container/{container name}/exec
+### POST /container/{container name}/exec
 
 Allows you to execute commands inside a running container. When making a call to this endpoint you must send the correct `Content-Type` headers and JSON as the body. An example request with cURL is below.
 
@@ -240,7 +250,7 @@ The response will be a json object, with each container in its own key. An examp
 }]
 ```
 
-### Home Assistant RESTful Switch
+## Home Assistant RESTful Switch
 
 You can use this service as a [RESTful switch](https://home-assistant.io/components/switch.rest/) inside Home Assistant.
 
@@ -261,11 +271,36 @@ switch:
     body_off: '{"state": "pause"}'
     is_on_template: '{{ value_json is not none and value_json.state == "running" }}'
 ```
-### Home Assistant Custom Component
 
-Thanks to [Joakim Sørensen (@ludeeus)](https://github.com/ludeeus) you can use a custom Home Assistant Component, which can automatically add switches to your Home Assistant instance from Dockermon.
+## MQTT Discovery
+HA-Dockermon can also be used in combination with [Home Assistant's MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/) feature. When enabled, HA-Dockermon will automatically post updates to an MQTT broker with the states of containers in Home Assistant. You could consider this as a _docker2mqtt_ feature.
 
-You can get the custom component [here](https://gitlab.com/custom_components/hadockermon).
+HA-Dockermon will automatically create switches on your Home Assistant instance when a new container is started. HA-Dockermon will also automatically remove those entities when a container is destroyed on the host system.
+
+### Base Topic
+When using MQTT, you should take care to set a unique base topic name for the configuration `mqtt.base_topic`. When adding entities to Home Assistant, HA-Dockermon will use the `mqtt.base_topic` to determine a unique ID for the container. This is important for container names which may be shared on multiple Docker hosts.
+
+This allows multiple instances of HA-Dockermon to be deployed on each Docker host, and have them report via MQTT to your Home Assistant instances without conflicts. 
+
+Assuming there are two instances of Home Assistant running on two seperate Docker hosts, HA-Dockermon will generate the following unqiue IDs.
+
+| Container Name | Base Topic            | Home Assistant Unique ID            |
+|----------------|-----------------------|-------------------------------------|
+| home-assistant | ha_dockermon/odyssey  | ha_dockermon_odysseyhome-assistant  |
+| home-assistant | ha_dockermon/daedalus | ha_dockermon_daedalushome-assistant |
+
+In Home Assistant, these will be created as `switch.home_assistant` and `switch.home_assistant2`. You can then use the Home Assistant interface to rename these switches to something which denotes which Docker host they are running on.
+
+### Changing Base Topic
+Changing the `mqtt.base_topic` setting will cause duplicate entities to be created in Home Assistant. For this reason it is suggested that once you have set your `mqtt.base_topic` setting, you don't change it in the future.
+
+### Switch Attributes
+HA-Dockermon will add information about the container to the switch attributes. Currently the information made available includes:
+
+* State (amount of time in state, status codes)
+* Status (running, exited, stopped)
+* Image and tag name (if available)
+
 
 # Further Reading
 For more in-depth Home Assistant examples and some ideas for use, please check out [this article on my blog](https://philhawthorne.com/ha-dockermon-use-home-assistant-to-monitor-start-or-stop-docker-containers).
