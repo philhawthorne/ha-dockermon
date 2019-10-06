@@ -33,6 +33,11 @@ module.exports = {
     
         //Switch based on the type of message
         if (message == "stop" || (hadockermon.config.get("mqtt.hass_discovery.enabled") && message == "off")) {
+            if (!hadockermon.isWhitelisted(container_name)) {
+                //This container is not whitelisted
+                return;
+            }
+
             if (hadockermon.config.get("debug")) {
                 console.log("Stopping container " + container_name);
             }
@@ -54,6 +59,10 @@ module.exports = {
                 }
             })
         } else if (message == "start" || (this.config.get("mqtt.hass_discovery.enabled") && message == "on")) {
+            if (!hadockermon.isWhitelisted(container_name)) {
+                //This container is not whitelisted
+                return;
+            }
             getContainer(container_name, function (container) {
                 docker.getContainer(container.Id).start(function (err, data) {
                     if (err) {
@@ -97,6 +106,15 @@ module.exports = {
         this.mqtt_client.publish(this.config.get("mqtt.hass_discovery.base_topic") + "/switch/" + this.config.get("mqtt.base_topic").replace("/", "_") + "/" + name.replace("-", "_") + "/config", JSON.stringify(jsonConfig), {
             retain: true
         });
+    },
+
+    isWhitelisted: function(name){
+        if (this.config.get('mqtt.whitelist_containers') !== undefined) {
+            //Is the name of this container on the whitelist?
+            return this.config.get('mqtt.whitelist_containers').includes(name);
+        }
+
+        return true;
     },
 
     hassDiscoveryPublish: function(name, containerInfo)
@@ -189,6 +207,11 @@ module.exports = {
             containers.forEach(function (containerInfo, idx, all_containers) {
                 //Use the first name index as the name for this container
                 var name = hadockermon.topicName(containerInfo.Names);
+
+                if (!hadockermon.isWhitelisted(name)) {
+                    //This container is not whitelisted so don't publish it
+                    return;
+                }
 
                 //Are we already tracking this container?
                 if (!hadockermon.mqttContainers[name]) {

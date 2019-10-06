@@ -39,6 +39,7 @@ You can change some configuration options for this service by editing config/con
 | mqtt.password                 | Optional. MQTT password to connect to the MQTT broker                                                                                                  |                      |
 | mqtt.base_topic               | MQTT base topic to send updates. Should be unique per HA-Dockermon instance, ie ha_dockermon/hostname                                                  | ha_dockermon         |
 | mqtt.scan_interval            | Number of seconds HA-Dockermon will scan the docker host for updates                                                                                   | 30                   |
+| mqtt.whitelist_containers            | If set, only container names in this list will be published via MQTT discovery                                                                                  |                    |
 | mqtt.hass_discovery.enabled   | Whether HA-Dockermon should send Home Assistant Discovery entities                                                                                     | true                 |
 | mqtt.hass_disovery.base_topic | The base topic Home Assistant listens for new devices                                                                                                  | homeassistant        |
 
@@ -293,6 +294,11 @@ In Home Assistant, these will be created as `switch.home_assistant` and `switch.
 
 ### Changing Base Topic
 Changing the `mqtt.base_topic` setting will cause duplicate entities to be created in Home Assistant. For this reason it is suggested that once you have set your `mqtt.base_topic` setting, you don't change it in the future.
+
+### Whitelisting Containers
+If you frequently create one-time containers to execute scripts, these may create un-necessary entities in your Home Assistant entity registry. 
+
+To avoid this, you can set HA-Dockermon to only expose the container names that you specify in the `mqtt.whitelist_containers` setting. Any container which does not have a name in this list will not be exposed by HA-Dockermon to Home Assistant, or be controllable via MQTT command topics.
 
 ### Switch Attributes
 HA-Dockermon will add information about the container to the switch attributes. Currently the information made available includes:

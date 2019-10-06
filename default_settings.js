@@ -85,6 +85,11 @@ var config = convict({
       format: 'int',
       default: 30
     },
+    whitelist_containers: {
+      doc: 'If set, only container names in this list will be published via MQTT discovery',
+      format: Array,
+      default: undefined
+    },
     hass_discovery: {
       enabled: {
         doc: 'Whether HA-Dockermon should send Home Assistant Discovery entities',
