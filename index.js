@@ -6,6 +6,40 @@ var fs = require('fs');
 var http = require('http');
 var config = require('./default_settings.js');
 var docker = false;
+var dockermonMqtt = require("./mqtt/hadockermon_mqtt.js");
+var mqtt = require('mqtt');
+
+//If we are set to use MQTT, start the MQTT connection
+if (config.get("mqtt.enabled")) {
+    if (config.get("debug")) {
+        console.log("MQTT is enabled");
+    }
+    
+    options = {
+        clientId: 'hadockermon_' + Math.random().toString(16).substr(2, 8),
+        will: {
+            topic: config.get("mqtt.base_topic") + "/status",
+            payload: "offline",
+            retain: true
+        }
+    }
+
+    //If we have a username and password set, use them
+    if (config.get("mqtt.username") && config.get("mqtt.password")) {
+        options.username = config.get("mqtt.username");
+        options.password = config.get("mqtt.password");
+    }
+    mqtt_client = mqtt.connect('mqtt://' + config.get("mqtt.host") + ":" + config.get("mqtt.port"), options);
+    mqtt_client.on('connect', function(){
+        //Send the states for each running container
+        dockermonMqtt.init(config, mqtt_client, docker);
+        dockermonMqtt.startMqtt();
+    });
+} else {
+    if (config.get("debug")) {
+        console.log("MQTT not enabled");
+    }
+}
 
 //Setup express
 var app = express();
@@ -611,3 +645,25 @@ function postCallbackRequest(url, data)
     req.write(JSON.stringify(data));
     req.end();
 }
+
+process.on('SIGINT', function() {
+    console.log("Caught interrupt signal");
+    if (config.get('mqtt.enabled')) {
+        if (typeof intervalObj != 'undefined')
+            clearInterval(intervalObj);
+        mqtt_client.end(function(){
+            process.exit();
+        });
+    } else {
+        process.exit();
+    }
+});
+process.on('SIGTERM', function() {
+    console.log("Caught terminate signal");
+    if (config.get('mqtt.enabled')) {
+        if (typeof intervalObj != 'undefined')
+            clearInterval(intervalObj);
+    }
+    
+    process.exit();
+});
