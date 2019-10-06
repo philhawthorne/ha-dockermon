@@ -36,7 +36,9 @@ if (config.get("mqtt.enabled")) {
         dockermonMqtt.startMqtt();
     });
 } else {
+    if (config.get("debug")) {
     console.log("MQTT not enabled");
+}
 }
 
 //Setup express
@@ -646,15 +648,22 @@ function postCallbackRequest(url, data)
 
 process.on('SIGINT', function() {
     console.log("Caught interrupt signal");
-    if (intervalObj)
+    if (config.get('mqtt.enabled')) {
+        if (intervalObj != undefined)
         clearInterval(intervalObj);
     mqtt_client.end(function(){
         process.exit();
     }); 
+    } else {
+        process.exit();
+    }
 });
 process.on('SIGTERM', function() {
     console.log("Caught terminate signal");
-    if (intervalObj)
+    if (config.get('mqtt.enabled')) {
+        if (intervalObj != undefined)
         clearInterval(intervalObj);
+    }
+    
     process.exit();
 });
