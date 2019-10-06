@@ -43,7 +43,7 @@ You can change some configuration options for this service by editing config/con
 | mqtt.scan_interval            | Number of seconds HA-Dockermon will scan the docker host for updates                                                                                   | 30                   |
 | mqtt.whitelist_containers            | If set, only container names in this list will be published via MQTT discovery                                                                                  |                    |
 | mqtt.hass_discovery.enabled   | Whether HA-Dockermon should send Home Assistant Discovery entities                                                                                     | true                 |
-| mqtt.hass_disovery.base_topic | The base topic Home Assistant listens for new devices                                                                                                  | homeassistant        |
+| mqtt.hass_discovery.base_topic | The base topic Home Assistant listens for new devices                                                                                                  | homeassistant        |
 
 ### Connecting to Docker
 
@@ -311,7 +311,7 @@ HA-Dockermon will add information about the container to the switch attributes. 
 * Status (running, exited, stopped)
 * Image and tag name (if available)
 
-### Use Without MQTT Disovery
+### Use Without MQTT Discovery
 When the `mqtt.hass_discovery.enabled` setting is turned off, it is still possible to control docker containers via MQTT. You will need to manually send the correct events to HA-Dockermon to control those containers.
 
 Below is a sample switch for Home Assistant that can use MQTT without MQTT discovery.
