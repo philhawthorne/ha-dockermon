@@ -8,14 +8,16 @@ HA Dockermon
 
 This is a simple Node service which checks the status of a Docker Container and returns a RESTful response. It can also be used to issue `start` `stop` `pause` `unpause` and `restart` commands. The primary purpose of this service is to interface with [Home Assistant](https://home-assistant.io) on a [Synology NAS](http://amzn.to/2FAC28A).
 
-## Supported Features
-As of this release, you can:
+This service can optionally be used to expose Docker containers over an MQTT broker, and supports [Home Assistant's MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/) feature.
+
+## Supported Docker Features
 
 * Get the status of a container (running, stopped, paused).
 * Start, stop, pause, or unpause a container by issuing a `POST` request.
 * Start, stop, pause, or unpause a container by issuing a `GET` requst.
 * Restart a container by making a `GET` request to a URL for the container (details below).
 * Execute commands inside a container using the `/exec` endpoint of a container.
+* Pull a docker image for the latest version from the remote repository
 
 ## Getting Started
 
@@ -278,6 +280,8 @@ HA-Dockermon can also be used in combination with [Home Assistant's MQTT Discove
 
 HA-Dockermon will automatically create switches on your Home Assistant instance when a new container is started. HA-Dockermon will also automatically remove those entities when a container is destroyed on the host system.
 
+**Warning:** When exposing Home Assistant via MQTT discovery, a switch entity will exist for your Home Assistant instance. Any calls to services such as `switch.turn_off` that specify an entity_id of `all` **will** turn off all of your Docker containers, including Home Assistant and HA-Dockermon (if exposed).
+
 ### Base Topic
 When using MQTT, you should take care to set a unique base topic name for the configuration `mqtt.base_topic`. When adding entities to Home Assistant, HA-Dockermon will use the `mqtt.base_topic` to determine a unique ID for the container. This is important for container names which may be shared on multiple Docker hosts.
 
@@ -306,6 +310,25 @@ HA-Dockermon will add information about the container to the switch attributes. 
 * State (amount of time in state, status codes)
 * Status (running, exited, stopped)
 * Image and tag name (if available)
+
+### Use Without MQTT Disovery
+When the `mqtt.hass_discovery.enabled` setting is turned off, it is still possible to control docker containers via MQTT. You will need to manually send the correct events to HA-Dockermon to control those containers.
+
+Below is a sample switch for Home Assistant that can use MQTT without MQTT discovery.
+
+```yaml
+switch:
+  - platform: mqtt
+    name: "Home Assistant"
+    state_topic: "ha_dockermon/server/home_assistant/state"
+    command_topic: "ha_dockermon/server/home_assistant/set"
+    payload_on: "on"
+    payload_off: "off"
+    state_on: "on"
+    state_off: "off"
+    qos: 0
+    retain: true
+```
 
 
 # Further Reading
