@@ -58,7 +58,7 @@ module.exports = {
                     res.send(message);
                 }
             })
-        } else if (message == "start" || (this.config.get("mqtt.hass_discovery.enabled") && message == "on")) {
+        } else if (message == "start" || (hadockermon.config.get("mqtt.hass_discovery.enabled") && message == "on")) {
             if (!hadockermon.isWhitelisted(container_name)) {
                 //This container is not whitelisted
                 return;
