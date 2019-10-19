@@ -107,8 +107,8 @@ module.exports = {
                 console.log("Stopping container " + container_name);
             }
             
-            getContainer(container_name, function (container) {
-                docker.getContainer(container.Id).stop(function (err, data) {
+            hadockermon.getContainer(container_name, function (container) {
+                hadockermon.docker.getContainer(container.Id).stop(function (err, data) {
                     if (err) {
                         return;
                     }
