@@ -129,7 +129,7 @@ module.exports = {
                 return;
             }
             hadockermon.getContainer(container_name, function (container) {
-                docker.getContainer(container.Id).start(function (err, data) {
+                hadockermon.docker.getContainer(container.Id).start(function (err, data) {
                     if (err) {
                         return;
                     }
