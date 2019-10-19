@@ -27,6 +27,71 @@ module.exports = {
         }
     },
 
+    getContainer: function(name, cb, error)
+    {
+        this.docker.listContainers({ limit:100, filters: { "name": [name] } }, function (err, containers) {
+            if (err) {
+                if (typeof error == "function")
+                    return error(500, err);
+
+                return;
+            }
+
+            if (containers.length > 0) {
+                //What is the ID of this container?
+                //We need to only return the ID as it matches exactly
+                for(id in containers) {
+                    //Does this container have names set?
+                    if (containers[id].Names.length) {
+                        //Yes it does, loop over all names to see if we get one
+                        for(i in containers[id].Names) {
+                            if (containers[id].Names[i] == "/" + name) {
+                                //Found it by name!
+                                return cb(containers[id]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Hmm lets try get the container by ID instead
+            this.docker.listContainers({ filters: { "id": [name] } }, function (err, containers) {
+                if (err) {
+                    if (typeof error == "function")
+                        return error(500, err);
+        
+                    return;
+                }
+        
+                if (containers.length < 1) {
+                    if (typeof error == "function")
+                        return error(404, "container not found");
+                    
+                    return;
+                }
+        
+                //What is the ID of this container?
+                //We need to only return the ID as it matches exactly
+                for(id in containers) {
+                    //Does this container have names set?
+                    if (containers[id].Names.length) {
+                        //Yes it does, check the first name
+                        if (containers[id].Id == name) {
+                            //Found it by name!
+                            return cb(containers[id]);
+                        }
+                    }
+                }
+
+                //Could not find that container - sad face
+                if (typeof error == "function")
+                    return error(404, "container not found");
+                
+                return false;
+            });
+        });
+    },
+
     handleMessage: function(topic, message, packet){
         //Extract the topic we were sent on
         var container_name = topic.replace(hadockermon.config.get("mqtt.base_topic") + "/", "").replace("/set", "");
@@ -63,7 +128,7 @@ module.exports = {
                 //This container is not whitelisted
                 return;
             }
-            getContainer(container_name, function (container) {
+            hadockermon.getContainer(container_name, function (container) {
                 docker.getContainer(container.Id).start(function (err, data) {
                     if (err) {
                         return;
