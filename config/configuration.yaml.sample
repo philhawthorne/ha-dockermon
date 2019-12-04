@@ -4,3 +4,13 @@ http:
 docker_connection:
   type: socket
   path: /var/run/docker.sock
+mqtt:
+  enabled: true
+  host: 127.0.0.1
+  base_topic: ha_dockermon/my_server
+  whitelist_containers:
+    - mysql
+    - home-assistant
+    - influx-grafana
+  hass_discovery:
+    enabled: true
