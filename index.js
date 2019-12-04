@@ -3,8 +3,43 @@ var basicAuth = require('express-basic-auth')
 var bodyParser = require('body-parser');
 var Docker = require('dockerode');
 var fs = require('fs');
+var http = require('http');
 var config = require('./default_settings.js');
 var docker = false;
+var dockermonMqtt = require("./mqtt/hadockermon_mqtt.js");
+var mqtt = require('mqtt');
+
+//If we are set to use MQTT, start the MQTT connection
+if (config.get("mqtt.enabled")) {
+    if (config.get("debug")) {
+        console.log("MQTT is enabled");
+    }
+    
+    options = {
+        clientId: 'hadockermon_' + Math.random().toString(16).substr(2, 8),
+        will: {
+            topic: config.get("mqtt.base_topic") + "/status",
+            payload: "offline",
+            retain: true
+        }
+    }
+
+    //If we have a username and password set, use them
+    if (config.get("mqtt.username") && config.get("mqtt.password")) {
+        options.username = config.get("mqtt.username");
+        options.password = config.get("mqtt.password");
+    }
+    mqtt_client = mqtt.connect('mqtt://' + config.get("mqtt.host") + ":" + config.get("mqtt.port"), options);
+    mqtt_client.on('connect', function(){
+        //Send the states for each running container
+        dockermonMqtt.init(config, mqtt_client, docker);
+        dockermonMqtt.startMqtt();
+    });
+} else {
+    if (config.get("debug")) {
+        console.log("MQTT not enabled");
+    }
+}
 
 //Setup express
 var app = express();
@@ -416,6 +451,85 @@ app.post('/container/:containerId/exec', function(req, res) {
     });
 })
 
+
+/**
+ * Pull the lastest image for the given repository, with or without tag
+ */
+app.get('/pull/*', function (req, res) {
+    var repoTag = req.params[0];
+    console.log("Pull" + repoTag);
+    docker.pull(repoTag, function (err, stream) {
+        if (err) {
+            if (config.get("debug")) {
+              console.log("Failed to pull docker image " + repoTag);
+              console.log(err);
+            }
+
+            res.status(500);
+            res.send(err);
+            return;
+        }
+        console.log("Pulling image...");
+        const chunks = [];
+        stream.on("data", function (chunk) {
+            chunks.push(chunk.toString());
+        });
+
+        // Send the buffer or you can put it into a var
+        stream.on("end", function () {
+            // We remove the first 8 chars as the contain a unicode START OF HEADING followed by ENQUIRY.
+            res.send({
+                status: true,
+                jresult: chunks.join('').substr(8)
+            });
+        });
+    });
+});
+
+/**
+ * Pull the latest image for the given repository/tag.
+ * When the pull is complete, notify the provided callback_uri of success or failure.
+ */
+app.post('/pull/*', function (req, res) {
+    var repoTag = req.params[0];
+    console.log("Pull" + repoTag + "asynchronously");
+    var callback = req.body.callback_uri ? req.body.callback_uri : false;
+    if (callback == "" || !callback) {
+        res.send({
+            status: false,
+            error: "No callback_uri specified. Use GET /pull/* to pull without a callback."
+        });
+        res.status(400);
+        return;
+    } else {
+        res.send({
+            status: true,
+            result: "Started pulling " + repoTag
+        })
+    }
+    docker.pull(repoTag, function (err, stream) {
+        if (err) {
+            if (config.get("debug")) {
+                console.log("Failed to pull docker image " + repoTag);
+                console.log(err);
+            }
+            var data = { status: false, error: `Failed to pull docker image ${repoTag}` };
+            postCallbackRequest(callback, data);
+            return;
+        }
+        console.log("Pulling image " + repoTag);
+        const chunks = [];
+        stream.on("data", function (chunk) {
+            chunks.push(chunk.toString());
+        });
+
+        stream.on("end", function () {
+            var data = { status: true, result: `Finished pulling docker image ${repoTag}` }
+            postCallbackRequest(callback, data)
+        });
+    });
+});
+
 //Attempt to connect to the Docker daemon
 switch (config.get("docker_connection.type")) {
     case "http":
@@ -518,3 +632,38 @@ function getContainer(name, cb, error)
         });
     });
 }
+
+function postCallbackRequest(url, data)
+{
+    var reqOpts = { method: 'POST', headers: { 'content-type': 'application/json' } };
+    var req = http.request(url, reqOpts, function (res) {
+        res.on('end', function () { console.log(`Message sent to callback uri: ${data}`) });
+    });
+    req.on('error', function (err) {
+        console.error(`Error sending POST request to callback URI: ${err.message}`);
+    });
+    req.write(JSON.stringify(data));
+    req.end();
+}
+
+process.on('SIGINT', function() {
+    console.log("Caught interrupt signal");
+    if (config.get('mqtt.enabled')) {
+        if (typeof intervalObj != 'undefined')
+            clearInterval(intervalObj);
+        mqtt_client.end(function(){
+            process.exit();
+        });
+    } else {
+        process.exit();
+    }
+});
+process.on('SIGTERM', function() {
+    console.log("Caught terminate signal");
+    if (config.get('mqtt.enabled')) {
+        if (typeof intervalObj != 'undefined')
+            clearInterval(intervalObj);
+    }
+    
+    process.exit();
+});
