@@ -15,12 +15,17 @@ case "$1" in
         # prepare qemu
         docker run --rm --privileged multiarch/qemu-user-static:register --reset
         docker build --build-arg BASE=balenalib/raspberrypi3-node:10.16 -t philhawthorne/ha-dockermon:edge-arm .
+        echo "Pushing standard edge image to Dockerhub"
         docker push philhawthorne/ha-dockermon:edge
+        echo "Pushing arm edge image to Dockerhub"
         docker push philhawthorne/ha-dockermon:edge-arm
 
+        echo "Creating manifest"
         docker manifest create --amend \
 		philhawthorne/ha-dockermon:edge \
 		philhawthorne/ha-dockermon:edge-arm \
+        docker manifest annotate philhawthorne/ha-dockermon:edge-arm --arch arm
+        echo "Pushing manifest"
 		docker manifest push philhawthorne/ha-dockermon:edge
         ;;
     *)
