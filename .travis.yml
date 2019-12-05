@@ -3,6 +3,18 @@ sudo: required
 services:
   - docker
 
+#Update Docker to latest version for manifests support
+apt:
+  packages:
+    - docker-ce
+
+before_install:
+  - docker --version  # document the version Travis is using (currently 17.x, which is way too old)
+  - echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json # try to use manifests
+  - mkdir -p $HOME/.docker
+  - echo '{"experimental":"enabled"}' | tee $HOME/.docker/config.json # needed to use docker manifest
+  - sudo service docker restart
+
 language: node_js
 
 branches:
