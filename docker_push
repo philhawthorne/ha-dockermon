@@ -5,14 +5,16 @@ case "$1" in
     master )
         docker build --build-arg BASE=node:10.16 -t philhawthorne/ha-dockermon:latest .
         docker run --rm --privileged multiarch/qemu-user-static:register --reset
-        docker build --build-arg BASE=balenalib/raspberrypi3-node:10.16 philhawthorne/ha-dockermon:arm .
+        docker build --build-arg BASE=balenalib/raspberrypi3-node:10.16 -t philhawthorne/ha-dockermon:arm .
         docker push philhawthorne/ha-dockermon:latest
         docker push philhawthorne/ha-dockermon:arm
         ;;
     edge )
         echo "Tagging and pushing images as edge"
         docker build --build-arg BASE=node:10.16 -t philhawthorne/ha-dockermon:edge .
-        docker build --build-arg BASE=balenalib/raspberrypi3-node:10.16 philhawthorne/ha-dockermon:edge-arm .
+        # prepare qemu
+        docker run --rm --privileged multiarch/qemu-user-static:register --reset
+        docker build --build-arg BASE=balenalib/raspberrypi3-node:10.16 -t philhawthorne/ha-dockermon:edge-arm .
         docker push philhawthorne/ha-dockermon:edge
         docker push philhawthorne/ha-dockermon:edge-arm
 
@@ -26,7 +28,7 @@ case "$1" in
         docker build --build-arg BASE=node:10.16 -t philhawthorne/ha-dockermon:"$1" .
         # prepare qemu
         docker run --rm --privileged multiarch/qemu-user-static:register --reset
-        docker build --build-arg BASE=balenalib/raspberrypi3-node:10.16 philhawthorne/ha-dockermon:"$1"-arm .
+        docker build --build-arg BASE=balenalib/raspberrypi3-node:10.16 -t philhawthorne/ha-dockermon:"$1"-arm .
         docker push philhawthorne/ha-dockermon:"$1"
         docker push philhawthorne/ha-dockermon:"$1"-arm
         ;;
