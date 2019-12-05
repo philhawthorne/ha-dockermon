@@ -12,8 +12,6 @@ case "$1" in
     edge )
         echo "Tagging and pushing images as edge"
         docker build --build-arg BASE=node:10.16 -t philhawthorne/ha-dockermon:edge .
-        # prepare qemu
-        docker run --rm --privileged multiarch/qemu-user-static:register --reset
         docker build --build-arg BASE=balenalib/raspberrypi3-node:10.16 philhawthorne/ha-dockermon:edge-arm .
         docker push philhawthorne/ha-dockermon:edge
         docker push philhawthorne/ha-dockermon:edge-arm
