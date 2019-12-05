@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/philhawthorne/ha-dockermon#readme",
   "dependencies": {
-    "body-parser": "^1.18.2",
+    "body-parser": "^1.19.0",
     "convict": "^5.1.0",
     "dockerode": "^2.5.3",
     "express": "^4.16.2",
