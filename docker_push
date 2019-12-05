@@ -23,7 +23,7 @@ case "$1" in
         echo "Creating manifest"
         docker manifest create --amend \
 		philhawthorne/ha-dockermon:edge \
-		philhawthorne/ha-dockermon:edge-arm \
+		philhawthorne/ha-dockermon:edge-arm
         docker manifest annotate philhawthorne/ha-dockermon:edge-arm --arch arm
         echo "Pushing manifest"
 		docker manifest push philhawthorne/ha-dockermon:edge
