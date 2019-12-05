@@ -3,27 +3,32 @@ echo "Logging in to Docker as $DOCKER_USERNAME"
 echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 case "$1" in
     master )
-        docker build -t philhawthorne/ha-dockermon:latest .
+        docker build --build-arg BASE=node:10.16 -t philhawthorne/ha-dockermon:latest .
         docker run --rm --privileged multiarch/qemu-user-static:register --reset
-        docker build -t philhawthorne/ha-dockermon:arm -f Dockerfile.RaspberryPi .
+        docker build --build-ard BASE=balenalib/raspberrypi3-node:10.16 philhawthorne/ha-dockermon:arm .
         docker push philhawthorne/ha-dockermon:latest
         docker push philhawthorne/ha-dockermon:arm
         ;;
     edge )
         echo "Tagging and pushing images as edge"
-        docker build -t philhawthorne/ha-dockermon:edge .
+        docker build --build-arg BASE=node:10.16 -t philhawthorne/ha-dockermon:edge .
         # prepare qemu
         docker run --rm --privileged multiarch/qemu-user-static:register --reset
-        docker build -t philhawthorne/ha-dockermon:edge-arm -f Dockerfile.RaspberryPi .
+        docker build --build-ard BASE=balenalib/raspberrypi3-node:10.16 philhawthorne/ha-dockermon:edge-arm .
         docker push philhawthorne/ha-dockermon:edge
         docker push philhawthorne/ha-dockermon:edge-arm
+
+        docker manifest create --amend \
+		philhawthorne/ha-dockermon:edge \
+		philhawthorne/ha-dockermon:edge-arm \
+		docker manifest push philhawthorne/ha-dockermon:edge
         ;;
     *)
         echo "Tagging release $1"
-        docker build -t philhawthorne/ha-dockermon:"$1" .
+        docker build --build-arg BASE=node:10.16 -t philhawthorne/ha-dockermon:"$1" .
         # prepare qemu
         docker run --rm --privileged multiarch/qemu-user-static:register --reset
-        docker build -t philhawthorne/ha-dockermon:"$1"-arm -f Dockerfile.RaspberryPi .
+        docker build --build-ard BASE=balenalib/raspberrypi3-node:10.16 philhawthorne/ha-dockermon:"$1"-arm .
         docker push philhawthorne/ha-dockermon:"$1"
         docker push philhawthorne/ha-dockermon:"$1"-arm
         ;;

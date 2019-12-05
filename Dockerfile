@@ -1,4 +1,5 @@
-FROM node:10.16
+ARG BASE
+FROM ${BASE}
 ENV config_dir=/config
 RUN mkdir -p /usr/src/app && mkdir /config
 WORKDIR /usr/src/app
