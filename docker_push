@@ -8,6 +8,14 @@ case "$1" in
         docker build --build-arg BASE=balenalib/raspberrypi3-node:10.16 -t philhawthorne/ha-dockermon:arm .
         docker push philhawthorne/ha-dockermon:latest
         docker push philhawthorne/ha-dockermon:arm
+
+        echo "Creating manifest"
+        docker manifest create --amend \
+		philhawthorne/ha-dockermon:latest \
+		philhawthorne/ha-dockermon:arm
+        docker manifest annotate philhawthorne/ha-dockermon:latest philhawthorne/ha-dockermon:arm --arch arm
+        echo "Pushing manifest"
+		docker manifest push philhawthorne/ha-dockermon:latest
         ;;
     edge )
         echo "Tagging and pushing images as edge"
@@ -24,7 +32,7 @@ case "$1" in
         docker manifest create --amend \
 		philhawthorne/ha-dockermon:edge \
 		philhawthorne/ha-dockermon:edge-arm
-        docker manifest annotate philhawthorne/ha-dockermon:edge-arm --arch arm
+        docker manifest annotate philhawthorne/ha-dockermon:edge philhawthorne/ha-dockermon:edge-arm --arch arm
         echo "Pushing manifest"
 		docker manifest push philhawthorne/ha-dockermon:edge
         ;;
@@ -36,5 +44,13 @@ case "$1" in
         docker build --build-arg BASE=balenalib/raspberrypi3-node:10.16 -t philhawthorne/ha-dockermon:"$1"-arm .
         docker push philhawthorne/ha-dockermon:"$1"
         docker push philhawthorne/ha-dockermon:"$1"-arm
+
+        echo "Creating manifest"
+        docker manifest create --amend \
+		philhawthorne/ha-dockermon:"$1" \
+		philhawthorne/ha-dockermon:"$1"-arm
+        docker manifest annotate philhawthorne/ha-dockermon:"$1" philhawthorne/ha-dockermon:"$1"-arm --arch arm
+        echo "Pushing manifest"
+		docker manifest push philhawthorne/ha-dockermon:"$1"
         ;;
     esac
