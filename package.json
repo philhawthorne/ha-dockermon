@@ -31,7 +31,7 @@
     "express": "^4.16.2",
     "express-basic-auth": "^1.2.0",
     "js-yaml": "^3.13.1",
-    "snyk": "^1.251.1"
+    "snyk": "^1.251.2"
   },
   "snyk": true
 }
