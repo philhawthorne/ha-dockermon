@@ -32,6 +32,7 @@ case "$1" in
         echo "Creating manifest"
         docker manifest create --amend \
 		philhawthorne/ha-dockermon:edge \
+        philhawthorne/ha-dockermon:edge-x64 \
 		philhawthorne/ha-dockermon:edge-arm
         docker manifest annotate philhawthorne/ha-dockermon:edge philhawthorne/ha-dockermon:edge-arm --arch arm
         docker manifest annotate philhawthorne/ha-dockermon:edge philhawthorne/ha-dockermon:edge-x64 --os linux
