@@ -20,6 +20,7 @@ case "$1" in
     edge )
         echo "Tagging and pushing images as edge"
         docker build --build-arg BASE=node:10.16 -t philhawthorne/ha-dockermon:edge .
+        docker build --build-arg BASE=node:10.16 -t philhawthorne/ha-dockermon:edge-x64 .
         # prepare qemu
         docker run --rm --privileged multiarch/qemu-user-static:register --reset
         docker build --build-arg BASE=balenalib/raspberrypi3-node:10.16 -t philhawthorne/ha-dockermon:edge-arm .
@@ -33,6 +34,7 @@ case "$1" in
 		philhawthorne/ha-dockermon:edge \
 		philhawthorne/ha-dockermon:edge-arm
         docker manifest annotate philhawthorne/ha-dockermon:edge philhawthorne/ha-dockermon:edge-arm --arch arm
+        docker manifest annotate philhawthorne/ha-dockermon:edge philhawthorne/ha-dockermon:edge-x64 --os linux
         echo "Pushing manifest"
 		docker manifest push philhawthorne/ha-dockermon:edge
         ;;
