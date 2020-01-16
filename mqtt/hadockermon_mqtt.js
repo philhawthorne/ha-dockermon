@@ -114,7 +114,7 @@ module.exports = {
                     }
                     setTimeout(function(){
                         hadockermon.publishMqtt(mqtt_client);
-                    }, 2000);
+                    }, 200);
                 });
             }, function (status, message) {
                 console.log("Something went wrong? " + status + " " + message);
@@ -135,7 +135,7 @@ module.exports = {
                     }
                     setTimeout(function(){
                         hadockermon.publishMqtt(mqtt_client);
-                    }, 2000);
+                    }, 200);
                 });
             }, function (status, message) {
                 console.log("Something went wrong? " + status + " " + message);
