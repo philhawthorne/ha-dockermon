@@ -26,6 +26,7 @@ case "$1" in
         docker build --build-arg BASE=balenalib/raspberrypi3-node:10.16 -t philhawthorne/ha-dockermon:edge-arm .
         echo "Pushing standard edge image to Dockerhub"
         docker push philhawthorne/ha-dockermon:edge
+        docker push philhawthorne/ha-dockermon:edge-x64
         echo "Pushing arm edge image to Dockerhub"
         docker push philhawthorne/ha-dockermon:edge-arm
 
