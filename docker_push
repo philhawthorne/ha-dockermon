@@ -4,16 +4,20 @@ echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 case "$1" in
     master )
         docker build --build-arg BASE=node:10.16 -t philhawthorne/ha-dockermon:latest .
+        docker build --build-arg BASE=node:10.16 -t philhawthorne/ha-dockermon:x64 .
         docker run --rm --privileged multiarch/qemu-user-static:register --reset
         docker build --build-arg BASE=balenalib/raspberrypi3-node:10.16 -t philhawthorne/ha-dockermon:arm .
         docker push philhawthorne/ha-dockermon:latest
         docker push philhawthorne/ha-dockermon:arm
+        docker push philhawthorne/ha-dockermon:x64
 
         echo "Creating manifest"
         docker manifest create --amend \
 		philhawthorne/ha-dockermon:latest \
+        philhawthorne/ha-dockermon:x64 \
 		philhawthorne/ha-dockermon:arm
         docker manifest annotate philhawthorne/ha-dockermon:latest philhawthorne/ha-dockermon:arm --arch arm
+        docker manifest annotate philhawthorne/ha-dockermon:latest philhawthorne/ha-dockermon:x64 --os linux
         echo "Pushing manifest"
 		docker manifest push philhawthorne/ha-dockermon:latest
         ;;
