@@ -22,7 +22,7 @@ module.exports = {
 
                 if (hadockermon.config.get("debug")) {
                     console.log("Cannot find container " + i + " in pushed containers");
-                    console.log("Error rate for " + i + " is not " + hadockermon.mqttContainers[i].errors);
+                    console.log("Error rate for " + i + " is now " + hadockermon.mqttContainers[i].errors);
                 }
 
                 //If we have three strikes, you're out!
@@ -105,6 +105,11 @@ module.exports = {
         if (topic.indexOf("state") >= 0) {
             if (hadockermon.config.get("debug")) {
                 console.log("Received state message on topic " + topic);
+            }
+
+            if (message == "destroyed") {
+                //Nothing to do
+                return;
             }
 
             //We are receiving the state topic, add this to published containers
@@ -277,7 +282,11 @@ module.exports = {
         }
         //Publish a remove topic
         if (this.config.get("mqtt.hass_discovery.enabled")) {
-            this.mqtt_client.publish(this.config.get("mqtt.hass_discovery.base_topic") + "/switch/" + this.config.get("mqtt.base_topic").replace("/","_") + name.replace("-", "_") + "/config", "", {
+            this.mqtt_client.publish(this.config.get("mqtt.hass_discovery.base_topic") + "/switch/" + this.config.get("mqtt.base_topic").replace("/","_") + "/" + name.replace("-", "_") + "/config", "", {
+                retain: false
+            });
+            //Also remove the state topic
+            this.mqtt_client.publish(this.config.get("mqtt.base_topic") + "/" + name + "/state", "", {
                 retain: false
             });
         } else {
@@ -330,7 +339,7 @@ module.exports = {
             //Wait 5 seconds then check for deleted containers
             setTimeout(function(){
                 hadockermon.checkDeletedContainers(hadockermon.pushedContainers);
-            });
+            }, 5000);
         });
     },
 
