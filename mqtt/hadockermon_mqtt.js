@@ -12,22 +12,25 @@ module.exports = {
 
     checkDeletedContainers: function(pushedContainers)
     {
-        for (i in this.mqttContainers) {
+        if (hadockermon.config.get("debug")) {
+            console.log("Checking for deleted containers");
+        }
+        for (i in hadockermon.mqttContainers) {
             if (pushedContainers.indexOf(i) < 0) {
                 //Was not pushed? Increment errors
-                this.mqttContainers[i].errors++;
+                hadockermon.mqttContainers[i].errors++;
 
                 if (hadockermon.config.get("debug")) {
                     console.log("Cannot find container " + i + " in pushed containers");
-                    console.log("Error rate for " + i + " is not " + mqttContainers[i].errors);
+                    console.log("Error rate for " + i + " is not " + hadockermon.mqttContainers[i].errors);
                 }
 
                 //If we have three strikes, you're out!
-                if (mqttContainers[i].errors === 3) {
-                    this.mqttRemove(i);
+                if (hadockermon.mqttContainers[i].errors === 3) {
+                    hadockermon.mqttRemove(i);
                 }
             } else {
-                this.mqttContainers[i].errors = 0;
+                hadockermon.mqttContainers[i].errors = 0;
             }
         }
     },
