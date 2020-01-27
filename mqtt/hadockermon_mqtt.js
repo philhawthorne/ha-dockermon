@@ -17,6 +17,11 @@ module.exports = {
                 //Was not pushed? Increment errors
                 this.mqttContainers[i].errors++;
 
+                if (hadockermon.config.get("debug")) {
+                    console.log("Cannot find container " + i + " in pushed containers");
+                    console.log("Error rate for " + i + " is not " + mqttContainers[i].errors);
+                }
+
                 //If we have three strikes, you're out!
                 if (mqttContainers[i].errors === 3) {
                     this.mqttRemove(i);
@@ -264,6 +269,9 @@ module.exports = {
 
     mqttRemove: function(name)
     {
+        if (hadockermon.config.get("debug")) {
+            console.log("Publishing remove state for " + name);
+        }
         //Publish a remove topic
         if (this.config.get("mqtt.hass_discovery.enabled")) {
             this.mqtt_client.publish(this.config.get("mqtt.hass_discovery.base_topic") + "/switch/" + this.config.get("mqtt.base_topic").replace("/","_") + name.replace("-", "_") + "/config", "", {
