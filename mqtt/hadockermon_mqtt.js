@@ -28,6 +28,7 @@ module.exports = {
                 //If we have three strikes, you're out!
                 if (hadockermon.mqttContainers[i].errors === 3) {
                     hadockermon.mqttRemove(i);
+                    delete hadockermon.mqttContainers[i];
                 }
             } else {
                 hadockermon.mqttContainers[i].errors = 0;
