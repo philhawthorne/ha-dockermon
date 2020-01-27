@@ -298,7 +298,8 @@ module.exports = {
         this.docker.listContainers( {
             all: true
         }, function (err, containers) {
-            containers.forEach(function (containerInfo, idx, all_containers) {
+            all_containers_length = containers.length;
+            containers.forEach(function (containerInfo, idx) {
                 //Use the first name index as the name for this container
                 var name = hadockermon.topicName(containerInfo.Names);
 
@@ -327,7 +328,7 @@ module.exports = {
                 hadockermon.pushedContainers.push(name);
 
                 //If this is the last item, we need to check for any deleted items
-                if (idx === (all_containers.length - 1)){ 
+                if (idx === (all_containers_length - 1)){ 
                     hadockermon.checkDeletedContainers(hadockermon.pushedContainers);
                 }
             });
