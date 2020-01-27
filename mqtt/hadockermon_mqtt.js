@@ -327,7 +327,7 @@ module.exports = {
                 hadockermon.pushedContainers.push(name);
 
                 //If this is the last item, we need to check for any deleted items
-                if (idx === all_containers.length - 1){ 
+                if (idx === (all_containers.length - 1)){ 
                     hadockermon.checkDeletedContainers(hadockermon.pushedContainers);
                 }
             });
