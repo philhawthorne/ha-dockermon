@@ -94,6 +94,24 @@ module.exports = {
 
     handleMessage: function(topic, message, packet){
         //Extract the topic we were sent on
+        if (topic.indexOf("state") >= 0) {
+            if (hadockermon.config.get("debug")) {
+                console.log("Received state message on topic " + topic);
+            }
+
+            //We are receiving the state topic, add this to published containers
+            var container_name = topic.replace(hadockermon.config.get("mqtt.base_topic") + "/", "").replace("/state", "");
+            if (!hadockermon.mqttContainers[container_name]) {
+                hadockermon.mqttContainers[container_name] = {
+                    errors: 0
+                }
+            }
+            return;
+        } else if (topic.indexOf("set") < 0) {
+            //Don't do anything with this message
+            return;
+        }
+
         var container_name = topic.replace(hadockermon.config.get("mqtt.base_topic") + "/", "").replace("/set", "");
     
         //Switch based on the type of message
@@ -280,8 +298,7 @@ module.exports = {
 
                 //Are we already tracking this container?
                 if (!hadockermon.mqttContainers[name]) {
-                    //No, subscribe to this topic!
-                    hadockermon.subscribe(name);
+                    //No, set the home assistant variables if required
                     if (hadockermon.config.get("mqtt.hass_discovery.enabled")) {
                         hadockermon.initializeEntities(name, containerInfo);
                     }
@@ -320,6 +337,8 @@ module.exports = {
         hadockermon = this;
 
         this.mqtt_client.on('message', hadockermon.handleMessage)
+
+        this.mqtt_client.subscribe(this.config.get("mqtt.base_topic") + "/#");
     
         this.mqttPublisher = setInterval(function(){
             hadockermon.publishMqtt(mqtt_client);
