@@ -90,7 +90,9 @@ You can run this service directly from a host that has NPM and NodeJS installed.
     npm start
 
 ## Raspberry Pi and other versions
-A Raspberry Pi image is available if you wish to use this on a pi. Simply use the `arm` tag, for example:
+HA-Dockermon use Docker Manifests to automatically download the correct version for your operating system. If this doesn't work on your system, please open an issue.
+
+Alternatively you may use the `arm` tag to specifically use a Raspberry Pi friendly image.
 
 ```bash
 docker run -d \
