@@ -3,8 +3,8 @@ echo "Logging in to Docker as $DOCKER_USERNAME"
 echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 case "$1" in
     master )
-        docker build --build-arg BASE=node:10.16 -t philhawthorne/ha-dockermon:latest .
-        docker build --build-arg BASE=node:10.16 -t philhawthorne/ha-dockermon:x64 .
+        docker build --build-arg BASE=node:10.16-slim -t philhawthorne/ha-dockermon:latest .
+        docker build --build-arg BASE=node:10.16-slim -t philhawthorne/ha-dockermon:x64 .
         docker run --rm --privileged multiarch/qemu-user-static:register --reset
         docker build --build-arg BASE=balenalib/raspberrypi3-node:10.16 -t philhawthorne/ha-dockermon:arm .
         docker push philhawthorne/ha-dockermon:latest
