@@ -450,41 +450,6 @@ app.post('/container/:containerId/exec', function(req, res) {
             res.send(message);
         }
     });
-})
-
-
-/**
- * Pull the lastest image for the given repository, with or without tag
- */
-app.get('/pull/*', function (req, res) {
-    var repoTag = req.params[0];
-    console.log("Pull" + repoTag);
-    docker.pull(repoTag, function (err, stream) {
-        if (err) {
-            if (config.get("debug")) {
-              console.log("Failed to pull docker image " + repoTag);
-              console.log(err);
-            }
-
-            res.status(500);
-            res.send(err);
-            return;
-        }
-        console.log("Pulling image...");
-        const chunks = [];
-        stream.on("data", function (chunk) {
-            chunks.push(chunk.toString());
-        });
-
-        // Send the buffer or you can put it into a var
-        stream.on("end", function () {
-            // We remove the first 8 chars as the contain a unicode START OF HEADING followed by ENQUIRY.
-            res.send({
-                status: true,
-                jresult: chunks.join('').substr(8)
-            });
-        });
-    });
 });
 
 /**
