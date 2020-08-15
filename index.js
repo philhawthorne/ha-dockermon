@@ -4,6 +4,7 @@ var bodyParser = require('body-parser');
 var Docker = require('dockerode');
 var fs = require('fs');
 var http = require('http');
+var https = require('https');
 var config = require('./default_settings.js');
 var docker = false;
 var dockermonMqtt = require("./mqtt/hadockermon_mqtt.js");
@@ -636,9 +637,16 @@ function getContainer(name, cb, error)
 function postCallbackRequest(url, data)
 {
     var reqOpts = { method: 'POST', headers: { 'content-type': 'application/json' } };
-    var req = http.request(url, reqOpts, function (res) {
-        res.on('end', function () { console.log(`Message sent to callback uri: ${data}`) });
-    });
+    if (url.indexOf("https") > -1) {
+        var req = https.request(url, reqOpts, function (res) {
+            res.on('end', function () { console.log(`Message sent to callback uri: ${data}`) });
+        });
+    } else {
+        var req = http.request(url, reqOpts, function (res) {
+            res.on('end', function () { console.log(`Message sent to callback uri: ${data}`) });
+        });
+    }
+    
     req.on('error', function (err) {
         console.error(`Error sending POST request to callback URI: ${err.message}`);
     });
