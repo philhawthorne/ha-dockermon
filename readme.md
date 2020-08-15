@@ -6,7 +6,7 @@ HA Dockermon
 [![Buy me a coffee][buymeacoffee-icon]][buymeacoffee]
 
 
-This is a simple Node service which checks the status of a Docker Container and returns a RESTful response. It can also be used to issue `start` `stop` `pause` `unpause` and `restart` commands. The primary purpose of this service is to interface with [Home Assistant](https://home-assistant.io) on a [Synology NAS](http://amzn.to/2FAC28A).
+This is a simple Node service which checks the status of a Docker Container and returns a RESTful response. It can also be used to issue `start` `stop` `pause` `unpause` `restart` and `pull` commands. The primary purpose of this service is to interface with [Home Assistant](https://home-assistant.io) on a [Synology NAS](http://amzn.to/2FAC28A).
 
 This service can optionally be used to expose Docker containers over an MQTT broker, and supports [Home Assistant's MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/) feature.
 
