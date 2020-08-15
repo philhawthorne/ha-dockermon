@@ -38,6 +38,7 @@ module.exports = {
 
     getContainer: function(name, cb, error)
     {
+        var hadockermon = this;
         this.docker.listContainers({ limit:100, filters: { "name": [name] } }, function (err, containers) {
             if (err) {
                 if (typeof error == "function")
@@ -64,7 +65,7 @@ module.exports = {
             }
 
             //Hmm lets try get the container by ID instead
-            this.docker.listContainers({ filters: { "id": [name] } }, function (err, containers) {
+            hadockermon.docker.listContainers({ filters: { "id": [name] } }, function (err, containers) {
                 if (err) {
                     if (typeof error == "function")
                         return error(500, err);
