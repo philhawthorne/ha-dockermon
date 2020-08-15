@@ -255,6 +255,55 @@ The response will be a json object, with each container in its own key. An examp
 }]
 ```
 
+### POST /pull/{container_path}
+_Contriubted by [Daniel Welch](https://github.com/danielwelch)_
+
+Allows you to perform a `docker pull` command from a HTTP request.
+
+The `{container_path}` attribute allows you to specify the image you would like to pull. For example, to download the latest Home Assistant stable release, you can use `homeassistant/home-assistant`. A full example URL may look like `http://localhost:8126/pull/homeassistant/home-assistant`.
+
+You can also include the tag in the URL, as you normally would when performing `docker pull`. To pull the latest Home Assistant beta image, you would make a request to `http://localhost:8126/pull/homeassistant:beta`.
+
+#### Callback URI Required
+Please note that the `pull` endpoint must be called with HTTP `POST`. Since Home Assistant 0.114 shell commands are limited to an execution time of 60 seconds. As pulling a docker image may take longer than 60 seconds, HA-Dockermon will issue HTTP `POST` request to the URI provided. This allows you to be notified when the `docker pull` command has completed, to perform your next action or notification.
+
+```bash
+curl --location --request POST 'http://localhost:8126/pull/homeassistant/home-assistant' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "callback_uri": "http://webhook.url"
+}'
+```
+
+##### Callback Payload
+When the `docker pull` command is completed, the following data will be sent to your `callback_uri`:
+
+```json
+{
+  "status": true,
+  "result": "Finished pulling docker image homeassistant/home-assistant:latest"
+}
+```
+
+##### HTTP Response
+When HA-Dockermon begins pulling a docker image, you will receive an immediate response.
+
+```json
+{
+    "status": true,
+    "result": "Started pulling homeassistant/home-assistant:latest"
+}
+```
+
+__Important:__ HA-Dockermon uses locking to ensure that an image can only be pulled once at a time. For example making multiple calls to pull the `homeassistant/home-assistant:latest` image will result in the error below:
+
+```json
+{
+    "status": false,
+    "result": "Container is currently being pulled by another process"
+}
+```
+
 ## Home Assistant RESTful Switch
 
 You can use this service as a [RESTful switch](https://home-assistant.io/components/switch.rest/) inside Home Assistant.
