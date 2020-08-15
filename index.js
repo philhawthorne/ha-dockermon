@@ -48,6 +48,8 @@ app.use(bodyParser.json({
     type: ['application/octet-stream', 'application/json']
 }));
 
+var pull_lock = [];
+
 //If we have set a username and password, require it
 if (config.get("http.username")) {
     var authUsers = {
@@ -468,6 +470,15 @@ app.post('/pull/*', function (req, res) {
         res.status(400);
         return;
     } else {
+        if (pull_lock.includes(repoTag)) {
+            res.send({
+                status: false,
+                result: "Container is currently being pulled by another process"
+            });
+            res.status(400);
+            return;
+        }
+        pull_lock.push(repoTag);
         res.send({
             status: true,
             result: "Started pulling " + repoTag
@@ -491,7 +502,13 @@ app.post('/pull/*', function (req, res) {
 
         stream.on("end", function () {
             var data = { status: true, result: `Finished pulling docker image ${repoTag}` }
-            postCallbackRequest(callback, data)
+            postCallbackRequest(callback, data);
+
+            //Clear the pull lock
+            const index = pull_lock.indexOf(repoTag);
+            if (index > -1) {
+                pull_lock.splice(index, 1);
+            }
         });
     });
 });
