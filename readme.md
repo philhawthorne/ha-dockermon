@@ -47,18 +47,25 @@ You can change some configuration options for this service by editing config/con
 
 ### Connecting to Docker
 
-#### Docker Socket (Recommended)
-The most secure and reliable way to connect to the Docker service is by connecting to the Docker socket. Generally this is `/var/run/docker.sock`. It may be in a different location on your host, so you may need to mount the correct location with `-v` when using `docker run`. If running directly on the host with NodeJS, be sure to set the correct file path in config/configuration.yaml.
+<details>
+	<summary>Docker Socket (Recommended)</summary>
 
-#### HTTP
+The most secure and reliable way to connect to the Docker service is by connecting to the Docker socket. Generally this is `/var/run/docker.sock`. It may be in a different location on your host, so you may need to mount the correct location with `-v` when using `docker run`. If running directly on the host with NodeJS, be sure to set the correct file path in config/configuration.yaml.
+</details>
+
+<details>
+	<summary>HTTP</summary>
+
 You can expose the Docker Remote API over a HTTP port. This could allow other systems or parties to control the Docker containers on your host and is not recommended.
 
 Enabling an external HTTP port for Docker is beyond the scope of this readme.
-
+</details>
 
 ### Running
 
-#### Docker (Recommended)
+<details>
+	<summary>Docker (Recommended)</summary>
+
 The easiest way to get started is to run this service inside its own Docker container. You don't need to give any elevated permissions for this service to work however, you must mount the Docker socket to the container from the host (or specify a HTTP connection in the configuration.yaml file).
 
 ```bash
@@ -69,8 +76,11 @@ docker run -d \
 -p 8126:8126 \
 philhawthorne/ha-dockermon
 ```
+</details>
 
-#### Docker Compose
+<details>
+	<summary>Docker Compose</summary>
+
 If you prefer to use Docker Compose, here is a sample entry you can add to your Docker compose file.
 ```yaml
   docker_mon:
@@ -83,14 +93,19 @@ If you prefer to use Docker Compose, here is a sample entry you can add to your 
     ports:
       - 8126:8126
 ```
+</details>
 
-#### NodeJS
+<details>
+	<summary>NodeJS</summary>
+
 You can run this service directly from a host that has NPM and NodeJS installed. Just checkout this repository and then run:
 
     npm start
 
+</details>
+
 ## Raspberry Pi and other versions
-HA-Dockermon use Docker Manifests to automatically download the correct version for your operating system. If this doesn't work on your system, please open an issue.
+HA-Dockermon uses Docker Manifests to automatically download the correct version for your operating system. If this doesn't work on your system, please open an issue.
 
 Alternatively you may use the `arm` tag to specifically use a Raspberry Pi friendly image.
 
@@ -107,7 +122,8 @@ You may also use an older version. Check [Docker Hub](https://hub.docker.com/r/p
 
 # Using this service
 
-## HTTP / REST API
+<details>
+	<summary>HTTP / REST API</summary>
 
 This service exposes the following HTTP endpoints
 
@@ -307,8 +323,10 @@ __Important:__ HA-Dockermon uses locking to ensure that an image can only be pul
     "result": "Container is currently being pulled by another process"
 }
 ```
+</details>
 
-## Home Assistant RESTful Switch
+<details>
+	<summary>Home Assistant RESTful Switch</summary>
 
 You can use this service as a [RESTful switch](https://home-assistant.io/components/switch.rest/) inside Home Assistant.
 
@@ -329,8 +347,11 @@ switch:
     body_off: '{"state": "pause"}'
     is_on_template: '{{ value_json is not none and value_json.state == "running" }}'
 ```
+</details>
 
-## MQTT Discovery
+<details>
+	<summary>MQTT (Including MQTT Discovery for Home Assistant)</summary>
+
 HA-Dockermon can also be used in combination with [Home Assistant's MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/) feature. When enabled, HA-Dockermon will automatically post updates to an MQTT broker with the states of containers in Home Assistant. You could consider this as a _docker2mqtt_ feature.
 
 HA-Dockermon will automatically create switches on your Home Assistant instance when a new container is started. HA-Dockermon will also automatically remove those entities when a container is destroyed on the host system.
@@ -384,7 +405,7 @@ switch:
     qos: 0
     retain: true
 ```
-
+</details>
 
 # Further Reading
 For more in-depth Home Assistant examples and some ideas for use, please check out [this article on my blog](https://philhawthorne.com/ha-dockermon-use-home-assistant-to-monitor-start-or-stop-docker-containers).
