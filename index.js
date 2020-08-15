@@ -45,7 +45,7 @@ if (config.get("mqtt.enabled")) {
 //Setup express
 var app = express();
 app.use(bodyParser.json({
-    type: 'application/octet-stream'
+    type: ['application/octet-stream', 'application/json']
 }));
 
 //If we have set a username and password, require it
