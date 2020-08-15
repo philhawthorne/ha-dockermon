@@ -460,7 +460,12 @@ app.post('/container/:containerId/exec', function(req, res) {
  */
 app.post('/pull/*', function (req, res) {
     var repoTag = req.params[0];
-    console.log("Pull" + repoTag + "asynchronously");
+    if (repoTag.indexOf(":") < 0) {
+        //Append latest tag by default
+        repoTag += ":latest";
+    }
+
+    console.log("Pull " + repoTag + " asynchronously");
     var callback = req.body.callback_uri ? req.body.callback_uri : false;
     if (callback == "" || !callback) {
         res.send({
