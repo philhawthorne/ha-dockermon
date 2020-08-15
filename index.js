@@ -506,7 +506,16 @@ app.post('/pull/*', function (req, res) {
         });
 
         stream.on("end", function () {
-            var data = { status: true, result: `Finished pulling docker image ${repoTag}` }
+            //split the image and tag
+            var repoSplit = repoTag.split(":");
+            var data = { 
+                status: true, 
+                result: `Finished pulling docker image ${repoTag}`,
+                image: {
+                    image: repoSplit[0],
+                    tag: repoSplit[1]
+                }
+            }
             postCallbackRequest(callback, data);
 
             //Clear the pull lock

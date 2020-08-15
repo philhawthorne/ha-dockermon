@@ -281,7 +281,11 @@ When the `docker pull` command is completed, the following data will be sent to 
 ```json
 {
   "status": true,
-  "result": "Finished pulling docker image homeassistant/home-assistant:latest"
+  "result": "Finished pulling docker image homeassistant/home-assistant:latest",
+  "image": {
+    "image": "homeassistant/home-assistant",
+    "tag": "latest"
+  }
 }
 ```
 
