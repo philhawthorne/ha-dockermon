@@ -319,7 +319,7 @@ module.exports = {
                 }
 
                 //Are we already tracking this container?
-                if (!hadockermon.mqttContainers[name]) {
+                if (!hadockermon.pushedContainers.includes(name)) {
                     //No, set the home assistant variables if required
                     if (hadockermon.config.get("mqtt.hass_discovery.enabled")) {
                         hadockermon.initializeEntities(name, containerInfo);
