@@ -193,11 +193,32 @@ app.all('/container/:containerId', function (req, res) {
                 console.log("Response received");
                 console.log(container);
             }
-            res.send({
+
+            var response = {
                 state: container.SynoStatus || container.State,
                 status: container.Status,
                 image: container.Image
+            };
+
+            docker.getContainer(container.Id).inspect(function(err, data){
+                //Put environment into the response
+                if (data.Config.Env) {
+                    var env = data.Config.Env;
+                    response.environment = {};
+                    for(i in env) {
+                        //Explode the =
+                        var exploded = env[i].split("=");
+                        var key = exploded[0];
+                        delete exploded[0];
+                        var value = exploded.join("=");
+                        response.environment[key] = value.substring(1);
+                    }
+                }
+
+                res.send(response);
+                console.log(data);
             });
+            
         }, function(status, message){
             res.status(status);
             if (config.get("debug"))
