@@ -27,11 +27,12 @@
   "dependencies": {
     "body-parser": "^1.18.2",
     "convict": "^5.1.0",
+    "cors": "^2.8.5",
     "dockerode": "^2.5.3",
     "express": "^4.16.2",
     "express-basic-auth": "^1.2.0",
     "js-yaml": "^3.13.1",
-    "snyk": "^1.230.5"
+    "snyk": "^1.251.1"
   },
   "snyk": true
 }
