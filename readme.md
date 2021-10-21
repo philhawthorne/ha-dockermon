@@ -91,6 +91,10 @@ philhawthorne/ha-dockermon:arm
 
 You may also use an older version. Check [Docker Hub](https://hub.docker.com/r/philhawthorne/ha-dockermon/tags/) for the list of tags you may use.
 
+In order to make arm CPU's report memory usage add the following to your kernel command line located at `/boot/cmdline.txt`.
+```
+cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1
+```
 ## Using this service
 
 ### HTTP Endpoints
