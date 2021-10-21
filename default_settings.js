@@ -24,7 +24,12 @@ var config = convict({
         format: String,
         default: undefined,
         sensitive: true
-    }
+      },
+      cors: {
+        doc: 'Optional. HTTP Cross-Origin Resource Sharing header',
+        format: String,
+        default: undefined
+    }, 
   },
   docker_connection: {
     type: {

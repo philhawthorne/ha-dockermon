@@ -1,5 +1,6 @@
 var express = require("express");
 var basicAuth = require('express-basic-auth')
+var cors = require('cors')
 var bodyParser = require('body-parser');
 var Docker = require('dockerode');
 var fs = require('fs');
@@ -19,6 +20,14 @@ if (config.get("http.username")) {
     }
     authUsers.users[config.get("http.username")] = config.get("http.password");
     app.use(basicAuth(authUsers));
+}
+
+if (config.get("http.cors")) {
+    var corsOptions = {
+        origin: config.get("http.cors")
+    }
+      
+    app.use(cors(corsOptions))
 }
 
 //Set the container route
