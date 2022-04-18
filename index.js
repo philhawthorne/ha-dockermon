@@ -188,6 +188,21 @@ app.get('/containers', function (req, res) {
     });
 });
 
+/**
+ * List all of the services
+ */
+app.get('/services', function (req, res) {
+    docker.listServices({ all: true }, function (err, services) {
+        if (err) {
+            res.status(500);
+            res.send(err);
+            return;
+        }
+        res.status(200);
+        res.send(services);
+    });
+});
+
 
 /**
  * Restart the container by the ID specified
@@ -513,6 +528,71 @@ function getContainer(name, cb, error)
             //Could not find that container - sad face
             if (typeof error == "function")
                 return error(404, "container not found");
+            
+            return false;
+        });
+    });
+}
+
+function getService(name, cb, error)
+{
+    docker.listServices({ limit:100, filters: { "name": [name] } }, function (err, services) {
+        if (err) {
+            if (typeof error == "function")
+                return error(500, err);
+
+            return;
+        }
+
+        if (services.length > 0) {
+            //What is the ID of this service?
+            //We need to only return the ID as it matches exactly
+            for(id in services) {
+                //Does this service have names set?
+                if (services[id].Names.length) {
+                    //Yes it does, loop over all names to see if we get one
+                    for(i in services[id].Names) {
+                        if (services[id].Names[i] == "/" + name) {
+                            //Found it by name!
+                            return cb(services[id]);
+                        }
+                    }
+                }
+            }
+        }
+
+        //Hmm lets try get the service by ID instead
+        docker.listservices({ filters: { "id": [name] } }, function (err, services) {
+            if (err) {
+                if (typeof error == "function")
+                    return error(500, err);
+    
+                return;
+            }
+    
+            if (services.length < 1) {
+                if (typeof error == "function")
+                    return error(404, "service not found");
+                
+                return;
+            }
+    
+            //What is the ID of this service?
+            //We need to only return the ID as it matches exactly
+            for(id in services) {
+                //Does this service have names set?
+                if (services[id].Names.length) {
+                    //Yes it does, check the first name
+                    if (services[id].Id == name) {
+                        //Found it by name!
+                        return cb(services[id]);
+                    }
+                }
+            }
+
+            //Could not find that service - sad face
+            if (typeof error == "function")
+                return error(404, "service not found");
             
             return false;
         });
