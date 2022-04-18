@@ -209,7 +209,7 @@ app.get('/service/:serviceId/tasks', function (req, res) {
     }
 
     var serviceId = req.params.serviceId;
-    
+
     if (config.get("debug"))
         console.log("Getting tasks of service " + serviceId);
     getServiceTasks(serviceId, function(tasks){
@@ -668,7 +668,7 @@ function getServiceTasks(name, cb, error)
             return;
         }
 
-        if (services.length < 1) {
+        if (tasks.length < 1) {
             if (typeof error == "function")
                 return error(404, "task with service name not found");
             
