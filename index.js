@@ -173,6 +173,45 @@ app.all('/container/:containerId', function (req, res) {
     }
 });
 
+app.get('/service/:serviceId', function (req, res) {
+    if (config.get("debug"))
+        console.log("Getting status of service " + serviceId);
+    getService(serviceId, function(service){
+        res.status(200); // Service found
+        if (config.get("debug")){
+            console.log("Response received");
+            console.log(service);
+        }
+        res.send({
+            service: service,
+            replicas: service.Spec.Mode.Replicated.Replicas
+        });
+    })
+});
+
+app.get('/service/:serviceId/tasks', function (req, res) {
+    if (config.get("debug"))
+        console.log("Getting tasks of service " + serviceId);
+    getServiceTasks(serviceId, function(tasks){
+        res.status(200);
+        if (config.get("debug")){
+            console.log("Response received");
+            console.log(tasks);
+        }
+        tasksResult = [];
+        for (task in tasks)
+        {
+            tasksResult.push({
+                state: task.Status.State,
+                status: task.Status,
+                image: task.Spec.ContainerSpec.Image,
+                id: task.ID
+            });
+        }
+        res.send(tasksResult);
+    })
+});
+
 /**
  * List all of the containers
  */
@@ -597,4 +636,25 @@ function getService(name, cb, error)
             return false;
         });
     });
+}
+
+function getServiceTasks(name, cb, error)
+{
+    docker.listTasks({ filters: { "service": [name] } }, function (err, tasks) {
+        if (err) {
+            if (typeof error == "function")
+                return error(500, err);
+
+            return;
+        }
+
+        if (services.length < 1) {
+            if (typeof error == "function")
+                return error(404, "task with service name not found");
+            
+            return;
+        }
+
+        return cb(tasks);
+    })
 }
