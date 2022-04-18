@@ -223,8 +223,9 @@ app.get('/service/:serviceId/tasks', function (req, res) {
         {
             tasksResult.push({
                 // state: task.Status.State,
+                task: task,
                 status: task.Status,
-                image: task.Spec.ContainerSpec.Image,
+                // image: task.Spec.ContainerSpec.Image,
                 id: task.ID
             });
         }
