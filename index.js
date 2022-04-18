@@ -222,7 +222,7 @@ app.get('/service/:serviceId/tasks', function (req, res) {
         for (task in tasks)
         {
             tasksResult.push({
-                state: task.Status.State,
+                // state: task.Status.State,
                 status: task.Status,
                 image: task.Spec.ContainerSpec.Image,
                 id: task.ID
@@ -608,53 +608,11 @@ function getService(name, cb, error)
             //We need to only return the ID as it matches exactly
             for(id in services) {
                 //Does this service have names set?
-                if (services[id].Names.length) {
-                    //Yes it does, loop over all names to see if we get one
-                    for(i in services[id].Names) {
-                        if (services[id].Names[i] == "/" + name) {
-                            //Found it by name!
-                            return cb(services[id]);
-                        }
-                    }
+                if (services[id].Spec.Name.length) {
+                    return cb(services[id]);
                 }
             }
         }
-
-        //Hmm lets try get the service by ID instead
-        docker.listservices({ filters: { "id": [name] } }, function (err, services) {
-            if (err) {
-                if (typeof error == "function")
-                    return error(500, err);
-    
-                return;
-            }
-    
-            if (services.length < 1) {
-                if (typeof error == "function")
-                    return error(404, "service not found");
-                
-                return;
-            }
-    
-            //What is the ID of this service?
-            //We need to only return the ID as it matches exactly
-            for(id in services) {
-                //Does this service have names set?
-                if (services[id].Names.length) {
-                    //Yes it does, check the first name
-                    if (services[id].Id == name) {
-                        //Found it by name!
-                        return cb(services[id]);
-                    }
-                }
-            }
-
-            //Could not find that service - sad face
-            if (typeof error == "function")
-                return error(404, "service not found");
-            
-            return false;
-        });
     });
 }
 
