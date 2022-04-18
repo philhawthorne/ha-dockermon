@@ -218,17 +218,16 @@ app.get('/service/:serviceId/tasks', function (req, res) {
             console.log("Response received");
             console.log(tasks);
         }
-        // tasksResult = [];
-        // for (task in tasks)
-        // {
-        //     tasksResult.push({
-        //         // state: task.Status.State,
-        //         task: task,
-        //         status: task.Status,
-        //         // image: task.Spec.ContainerSpec.Image,
-        //         id: task.ID
-        //     });
-        // }
+        tasksResult = [];
+        tasks.forEach(task => {
+            tasksResult.push({
+                state: task.Status.State,
+                task: task,
+                status: task.Status,
+                image: task.Spec.ContainerSpec.Image,
+                id: task.ID
+            });
+        });
         res.send(tasks);
     })
 });
