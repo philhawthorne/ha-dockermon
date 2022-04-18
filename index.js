@@ -228,7 +228,7 @@ app.get('/service/:serviceId/tasks', function (req, res) {
                 id: task.ID
             });
         });
-        res.send(tasks);
+        res.send(tasksResult);
     })
 });
 
