@@ -174,6 +174,16 @@ app.all('/container/:containerId', function (req, res) {
 });
 
 app.get('/service/:serviceId', function (req, res) {
+
+    if (!req.params.serviceId) {
+        //This paramater is required
+        res.status(400);
+        res.send("Service ID/Name is required");
+        return;
+    }
+
+    var serviceId = req.params.serviceId;
+    
     if (config.get("debug"))
         console.log("Getting status of service " + serviceId);
     getService(serviceId, function(service){
