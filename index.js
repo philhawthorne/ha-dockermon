@@ -247,9 +247,16 @@ app.get('/service/:serviceId/update', function (req, res) {
             spec = inspectData.Spec;
             spec.TaskTemplate.ForceUpdate = 1;
             
-            service.update({spec, version: inspectData.Version.Index})
-            res.status(200); //We found the container! This reponse can be trusted
-            res.send(spec);
+            service.update({Spec: spec, version: inspectData.Version.Index}, function (err, data){
+                if (err) {
+                    res.status(500);
+                    res.send(err);
+                    return;
+                }
+
+                res.status(200);
+                res.send(data);
+            })
         });
 
 
