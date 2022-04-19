@@ -247,7 +247,7 @@ app.get('/service/:serviceId/update', function (req, res) {
             spec = inspectData.Spec;
             spec.TaskTemplate.ForceUpdate = 1;
             
-            service.update({Spec: spec, version: inspectData.Version.Index}, function (err, data){
+            service.update({...spec, version: inspectData.Version.Index}, function (err, data){
                 if (err) {
                     res.status(500);
                     res.send(err);
@@ -258,17 +258,6 @@ app.get('/service/:serviceId/update', function (req, res) {
                 res.send(data);
             })
         });
-
-
-        // updateService(service, function (data) {
-        //     res.status(200); //We found the service! This reponse can be trusted
-        //     res.send(data);
-        // })
-
-        // res.send({
-        //     service: service,
-        //     replicas: service.Spec.Mode.Replicated.Replicas
-        // });
     })
 });
 
@@ -694,23 +683,3 @@ function getServiceTasks(name, cb, error)
     })
 }
 
-// function updateService(service, cb, error)
-// {
-//     serviceData = service.inspect();
-
-//     serviceData.TaskTemplate.ForceUpdate = 1;
-//     version = serviceData.Version.Index;
-//     spec = serviceData.Spec;
-
-//     service.update({ spec, version: version }, function (err, response){
-//         if (err) {
-//             if (typeof error == "function")
-//                 return error(500, err);
-
-//             return;
-//         }
-        
-//         return cb(response);
-//     });
-
-// }
