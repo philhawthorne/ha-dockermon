@@ -235,7 +235,7 @@ app.get('/service/:serviceId/update', function (req, res) {
             console.log(service);
         }
 
-        let service = docker.getService(service.Id);
+        service = docker.getService(service.Id);
 
         service.inspect(function (err, inspectData){
             if (err) {
