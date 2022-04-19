@@ -244,6 +244,11 @@ app.get('/service/:serviceId/update', function (req, res) {
             res.status(200); //We found the service! This reponse can be trusted
             res.send(data);
         })
+
+        // res.send({
+        //     service: service,
+        //     replicas: service.Spec.Mode.Replicated.Replicas
+        // });
     })
 });
 
@@ -671,15 +676,13 @@ function getServiceTasks(name, cb, error)
 
 function updateService(service, cb, error)
 {
-    docker.inspect(service.ID, function(err, serviceData){
-        if (err) {
-            if (typeof error == "function")
-                return error(500, err);
+    serviceData = await service.inspect();
 
-            return;
-        }
-        
-        serviceData.TaskTemplate.ForceUpdate = 1;
-        docker.update(service.ID, serviceData, cb);
-    });
+    serviceData.TaskTemplate.ForceUpdate = 1;
+    version = serviceData.Version.Index;
+    spec = serviceData.Spec;
+
+    let response = await service.update({ spec, version: version })
+
+    return cb(false, response);
 }
