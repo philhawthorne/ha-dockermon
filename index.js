@@ -255,7 +255,11 @@ app.get('/service/:serviceId/update', function (req, res) {
                 }
 
                 res.status(200);
-                res.send(data);
+                if (data.Warnings){
+                    res.send({ status: "Success", warnings: data.Warnings });
+                } else {
+                    res.send({ status: "Success" });
+                }
             })
         });
     })
