@@ -235,12 +235,7 @@ app.get('/service/:serviceId/update', function (req, res) {
             console.log(service);
         }
 
-        updateService(service, function (err, data) {
-            if (err) {
-                res.status(500);
-                res.send(err);
-                return;
-            }
+        updateService(service, function (data) {
             res.status(200); //We found the service! This reponse can be trusted
             res.send(data);
         })
@@ -684,5 +679,5 @@ function updateService(service, cb, error)
 
     let response = await service.update({ spec, version: version })
 
-    return cb(false, response);
+    return cb(response);
 }
