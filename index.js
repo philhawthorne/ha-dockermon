@@ -173,7 +173,49 @@ app.all('/container/:containerId', function (req, res) {
     }
 });
 
+/**
+ * List all of the services
+ */
+app.get('/services', function (req, res) {
+    docker.listServices({ all: true }, function (err, services) {
+        if (err) {
+            res.status(500);
+            res.send(err);
+            return;
+        }
+        res.status(200);
+        res.send(services);
+    });
+});
+
 app.get('/service/:serviceId', function (req, res) {
+
+    if (!req.params.serviceId) {
+        //This paramater is required
+        res.status(400);
+        res.send("Service ID/Name is required");
+        return;
+    }
+
+    var serviceId = req.params.serviceId;
+
+    if (config.get("debug"))
+        console.log("Getting status of service " + serviceId);
+
+    getService(serviceId, function(service){
+        res.status(200); // Service found
+        if (config.get("debug")){
+            console.log("Response received");
+            console.log(service);
+        }
+        res.send({
+            service: service,
+            replicas: service.Spec.Mode.Replicated.Replicas
+        });
+    })
+});
+
+app.get('/service/:serviceId/update', function (req, res) {
 
     if (!req.params.serviceId) {
         //This paramater is required
@@ -192,10 +234,16 @@ app.get('/service/:serviceId', function (req, res) {
             console.log("Response received");
             console.log(service);
         }
-        res.send({
-            service: service,
-            replicas: service.Spec.Mode.Replicated.Replicas
-        });
+
+        updateService(service, function (err, data) {
+            if (err) {
+                res.status(500);
+                res.send(err);
+                return;
+            }
+            res.status(200); //We found the service! This reponse can be trusted
+            res.send(data);
+        })
     })
 });
 
@@ -246,22 +294,6 @@ app.get('/containers', function (req, res) {
         res.send(containers);
     });
 });
-
-/**
- * List all of the services
- */
-app.get('/services', function (req, res) {
-    docker.listServices({ all: true }, function (err, services) {
-        if (err) {
-            res.status(500);
-            res.send(err);
-            return;
-        }
-        res.status(200);
-        res.send(services);
-    });
-});
-
 
 /**
  * Restart the container by the ID specified
@@ -635,4 +667,19 @@ function getServiceTasks(name, cb, error)
 
         return cb(tasks);
     })
+}
+
+function updateService(service, cb, error)
+{
+    service.inspect(function(err, serviceData){
+        if (err) {
+            if (typeof error == "function")
+                return error(500, err);
+
+            return;
+        }
+        
+        serviceData.TaskTemplate.ForceUpdate = 1;
+        service.update(serviceData, cb);
+    });
 }
