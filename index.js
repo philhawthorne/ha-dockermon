@@ -671,7 +671,7 @@ function getServiceTasks(name, cb, error)
 
 function updateService(service, cb, error)
 {
-    service.inspect(function(err, serviceData){
+    docker.inspect(service.ID, function(err, serviceData){
         if (err) {
             if (typeof error == "function")
                 return error(500, err);
@@ -680,6 +680,6 @@ function updateService(service, cb, error)
         }
         
         serviceData.TaskTemplate.ForceUpdate = 1;
-        service.update(serviceData, cb);
+        docker.update(service.ID, serviceData, cb);
     });
 }
