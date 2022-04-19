@@ -671,13 +671,21 @@ function getServiceTasks(name, cb, error)
 
 function updateService(service, cb, error)
 {
-    serviceData = await service.inspect();
+    serviceData = service.inspect();
 
     serviceData.TaskTemplate.ForceUpdate = 1;
     version = serviceData.Version.Index;
     spec = serviceData.Spec;
 
-    let response = await service.update({ spec, version: version })
+    service.update({ spec, version: version }, function (err, response){
+        if (err) {
+            if (typeof error == "function")
+                return error(500, err);
 
-    return cb(response);
+            return;
+        }
+        
+        return cb(response);
+    });
+
 }
