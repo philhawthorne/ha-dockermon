@@ -235,10 +235,28 @@ app.get('/service/:serviceId/update', function (req, res) {
             console.log(service);
         }
 
-        updateService(service, function (data) {
-            res.status(200); //We found the service! This reponse can be trusted
-            res.send(data);
-        })
+        let service = docker.getService(service.Id);
+
+        service.inspect(function (err, inspectData){
+            if (err) {
+                res.status(500);
+                res.send(err);
+                return;
+            }
+
+            spec = inspectData.Spec;
+            spec.TaskTemplate.ForceUpdate = 1;
+            
+            service.update({spec, version: inspectData.Version.Index})
+            res.status(200); //We found the container! This reponse can be trusted
+            res.send(spec);
+        });
+
+
+        // updateService(service, function (data) {
+        //     res.status(200); //We found the service! This reponse can be trusted
+        //     res.send(data);
+        // })
 
         // res.send({
         //     service: service,
@@ -669,23 +687,23 @@ function getServiceTasks(name, cb, error)
     })
 }
 
-function updateService(service, cb, error)
-{
-    serviceData = service.inspect();
+// function updateService(service, cb, error)
+// {
+//     serviceData = service.inspect();
 
-    serviceData.TaskTemplate.ForceUpdate = 1;
-    version = serviceData.Version.Index;
-    spec = serviceData.Spec;
+//     serviceData.TaskTemplate.ForceUpdate = 1;
+//     version = serviceData.Version.Index;
+//     spec = serviceData.Spec;
 
-    service.update({ spec, version: version }, function (err, response){
-        if (err) {
-            if (typeof error == "function")
-                return error(500, err);
+//     service.update({ spec, version: version }, function (err, response){
+//         if (err) {
+//             if (typeof error == "function")
+//                 return error(500, err);
 
-            return;
-        }
+//             return;
+//         }
         
-        return cb(response);
-    });
+//         return cb(response);
+//     });
 
-}
+// }
