@@ -298,6 +298,53 @@ app.get('/service/:serviceId/tasks', function (req, res) {
     })
 });
 
+app.get('/service/:serviceId/restart', function (req, res) {
+
+    if (!req.params.serviceId) {
+        //This paramater is required
+        res.status(400);
+        res.send("Service ID/Name is required");
+        return;
+    }
+
+    var serviceId = req.params.serviceId;
+
+    if (config.get("debug"))
+        console.log("Getting tasks of service " + serviceId);
+    getServiceTasks(serviceId, function(tasks){
+        res.status(200);
+        if (config.get("debug")){
+            console.log("Response received");
+            console.log(tasks);
+        }
+        result = [];
+        restartErrorResult = [];
+        taskRestartResult = [];
+        tasks.forEach(task => {
+            getContainer(task.Status.ContainerStatus.ContainerID, function (container) {
+                docker.getContainer(container.Id).restart(function (err, data) {
+                    if (err) {
+                        restartErrorResult.push({
+                            container: container.Id,
+                            error: err
+                        })
+                    } else {
+                        taskRestartResult.push({
+                            container: container.Id,
+                            info: data
+                        })
+                    }
+                })
+            })
+        });
+        result.push({
+            errors: restartErrorResult,
+            successes: taskRestartResult
+        })
+        res.send(result);
+    })
+});
+
 /**
  * List all of the containers
  */
