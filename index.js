@@ -318,16 +318,18 @@ app.get('/service/:serviceId/restart', function (req, res) {
         restartErrorResult = [];
         taskRestartResult = [];
         tasks.forEach(task => {
+            console.log("Getting container " + task.Status.ContainerStatus.ContainerID);
             getContainer(task.Status.ContainerStatus.ContainerID, function (container) {
+                console.log("Restarting container " + container.Id);
                 docker.getContainer(container.Id).restart(function (err, data) {
                     if (err) {
-                        console.log("Error getting container " + container.Id);
+                        console.log("Error restarting container " + container.Id);
                         restartErrorResult.push({
                             container: container.Id,
                             error: err
                         })
                     } else {
-                        console.log("Retrieved container " + container.Id);
+                        console.log("Successfully restarted container " + container.Id);
                         taskRestartResult.push({
                             container: container.Id,
                             info: data
