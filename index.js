@@ -309,14 +309,11 @@ app.get('/service/:serviceId/restart', function (req, res) {
 
     var serviceId = req.params.serviceId;
 
-    if (config.get("debug"))
-        console.log("Getting tasks of service " + serviceId);
+    console.log("Getting tasks of service " + serviceId);
     getServiceTasks(serviceId, function(tasks){
         res.status(200);
-        if (config.get("debug")){
-            console.log("Response received");
-            console.log(tasks);
-        }
+        console.log("Response received");
+        console.log(tasks);
         result = [];
         restartErrorResult = [];
         taskRestartResult = [];
@@ -324,11 +321,13 @@ app.get('/service/:serviceId/restart', function (req, res) {
             getContainer(task.Status.ContainerStatus.ContainerID, function (container) {
                 docker.getContainer(container.Id).restart(function (err, data) {
                     if (err) {
+                        console.log("Error getting container " + container.Id);
                         restartErrorResult.push({
                             container: container.Id,
                             error: err
                         })
                     } else {
+                        console.log("Retrieved container " + container.Id);
                         taskRestartResult.push({
                             container: container.Id,
                             info: data
