@@ -188,6 +188,42 @@ app.get('/services', function (req, res) {
     });
 });
 
+app.get('/service-tasks', function (req, res) {
+    docker.listServices({ all: true }, function (err, services) {
+        if (err) {
+            res.status(500);
+            res.send(err);
+            return;
+        }
+        res.status(200);
+        serviceTasksResult = [];
+        services.forEach(service => {
+            getServiceTasks(service.ID, function(tasks){
+                res.status(200);
+                if (config.get("debug")){
+                    console.log("Response received");
+                    console.log(tasks);
+                }
+                tasksResult = [];
+                tasks.forEach(task => {
+                    tasksResult.push({
+                        state: task.Status.State,
+                        task: task,
+                        status: task.Status,
+                        image: task.Spec.ContainerSpec.Image,
+                        id: task.ID
+                    });
+                });
+            serviceTasksResult.push({
+                name: service.Spec.Name,
+                tasks: tasksResult
+                });
+            });
+        });
+        res.send(serviceTasksResult);
+    });
+});
+
 app.get('/service/:serviceId', function (req, res) {
 
     if (!req.params.serviceId) {
@@ -328,14 +364,24 @@ app.get('/service/:serviceId/restart', function (req, res) {
                             container: container.Id,
                             error: err
                         })
-                    } else {
-                        console.log("Successfully restarted container " + container.Id);
-                        taskRestartResult.push({
-                            container: container.Id,
-                            info: data
-                        })
+                        res.status(500);
+                        res.send(err);
+                        return;
+                    } 
+                    console.log("Successfully restarted container " + container.Id);
+                    taskRestartResult.push({
+                        container: container.Id,
+                        info: data
+                    })
+                    res.status(200);
+                    res.send(data);
+                }, function (status, message) {
+                    res.status(status);
+                    if (message) {
+                        res.send(message);
                     }
-                })
+                }
+                )
             })
         });
         result.push({
