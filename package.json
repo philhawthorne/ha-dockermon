@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 0",
-    "snyk-protect": "snyk protect",
+    "snyk-protect": "snyk-protect",
     "prepare": "npm run snyk-protect"
   },
   "repository": {
@@ -26,12 +26,12 @@
   "homepage": "https://github.com/philhawthorne/ha-dockermon#readme",
   "dependencies": {
     "body-parser": "^1.18.2",
-    "convict": "^5.1.0",
+    "convict": "^6.2.3",
     "dockerode": "^2.5.3",
     "express": "^4.16.2",
     "express-basic-auth": "^1.2.0",
     "js-yaml": "^3.13.1",
-    "snyk": "^1.251.1"
+    "@snyk/protect": "latest"
   },
   "snyk": true
 }
