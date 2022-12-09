@@ -28,7 +28,7 @@
     "body-parser": "^1.18.2",
     "convict": "^5.1.0",
     "dockerode": "^2.5.3",
-    "express": "^4.16.2",
+    "express": "^4.17.3",
     "express-basic-auth": "^1.2.0",
     "js-yaml": "^3.13.1",
     "snyk": "^1.251.1"
