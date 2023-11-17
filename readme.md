@@ -255,7 +255,7 @@ switch:
     name: Grafana
     body_on: '{"state": "start"}'
     body_off: '{"state": "stop"}'
-	headers:
+    headers:
       Content-Type: application/json
     is_on_template: '{{ value_json is not none and value_json.state == "running" }}'
     
