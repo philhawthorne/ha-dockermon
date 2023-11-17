@@ -121,7 +121,7 @@ Valid options for `state` are `start`, `stop`, `pause`, and `unpause` to start, 
 ```bash
 curl --request POST \
 --url http://127.0.0.1:8126/container/grafana \
---header 'content-type: application/octet-stream' \
+--header 'content-type: application/json' \
 --data '{"state": "start"}'
 ```
 
@@ -142,7 +142,7 @@ You must also send a `command` variable which contains the command you would lik
 ```bash
 curl --request POST \
 --url http://127.0.0.1:8126/container/grafana/exec \
---header 'content-type: application/octet-stream' \
+--header 'content-type: application/json' \
 --data '{"command": "ls -a"}'
 ```
 
@@ -255,6 +255,8 @@ switch:
     name: Grafana
     body_on: '{"state": "start"}'
     body_off: '{"state": "stop"}'
+	headers:
+	  Content-Type: application/json
     is_on_template: '{{ value_json is not none and value_json.state == "running" }}'
     
 switch:
@@ -263,6 +265,8 @@ switch:
     name: Mosquitto
     body_on: '{"state": "unpause"}'
     body_off: '{"state": "pause"}'
+	headers:
+	  Content-Type: application/json
     is_on_template: '{{ value_json is not none and value_json.state == "running" }}'
 ```
 ### Home Assistant Custom Component

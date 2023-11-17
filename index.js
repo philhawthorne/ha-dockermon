@@ -8,9 +8,7 @@ var docker = false;
 
 //Setup express
 var app = express();
-app.use(bodyParser.json({
-    type: 'application/octet-stream'
-}));
+app.use(bodyParser.json());
 
 //If we have set a username and password, require it
 if (config.get("http.username")) {
@@ -35,7 +33,6 @@ app.all('/container/:containerId', function (req, res) {
     //Does this container exist in Docker? If not respond with 404 not found and body of off
 
     if (req.method == "POST") {
-        //First get the container
         if (config.get("debug"))
             console.log("Updating container " + containerId);
 
@@ -132,6 +129,12 @@ app.all('/container/:containerId', function (req, res) {
                         state: "running"
                     });
                 });
+             } else {
+                res.status(500);
+                res.send({
+                    error: "Invalid state specified"
+                });
+                return;
              }
         }, function (status, message) {
             if (config.get("debug"))
