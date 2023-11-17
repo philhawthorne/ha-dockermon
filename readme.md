@@ -256,7 +256,7 @@ switch:
     body_on: '{"state": "start"}'
     body_off: '{"state": "stop"}'
 	headers:
-	  Content-Type: application/json
+      Content-Type: application/json
     is_on_template: '{{ value_json is not none and value_json.state == "running" }}'
     
 switch:
@@ -265,8 +265,8 @@ switch:
     name: Mosquitto
     body_on: '{"state": "unpause"}'
     body_off: '{"state": "pause"}'
-	headers:
-	  Content-Type: application/json
+    headers:
+      Content-Type: application/json
     is_on_template: '{{ value_json is not none and value_json.state == "running" }}'
 ```
 ### Home Assistant Custom Component
