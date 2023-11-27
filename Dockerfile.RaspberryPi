@@ -1,4 +1,4 @@
-FROM resin/raspberrypi3-node:8.0.0
+FROM balenalib/raspberry-pi-debian-node:16
 ENV config_dir=/config
 
 RUN mkdir -p /usr/src/app && mkdir /config
