@@ -22,9 +22,9 @@ jobs:
       if: success()      
       id: prepare      
       run: |        
-        echo ::set-output name=docker_platform::${DOCKER_TARGET_PLATFORM}        
-        echo ::set-output name=docker_image::${DOCKER_REGISTRY}/${DOCKER_IMAGE}        
-        echo ::set-output name=version::${GITHUB_RUN_NUMBER}    
+        echo "docker_platform=${DOCKER_TARGET_PLATFORM}" >> "$GITHUB_OUTPUT"
+        echo "docker_image=philhawthorne/ha-dockermon:json-arm" >> "$GITHUB_OUTPUT"
+        echo "version=${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
     - name: Docker Login      
       if: success()      
       run: |        
@@ -32,4 +32,4 @@ jobs:
     - name: Run Buildx (push image)      
       if: success()      
       run: |        
-        docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag ${{ steps.prepare.outputs.docker_image }}:json-arm --file ./Dockerfile.RaspberryPi --output type=image,push=true .
+        docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag ${{ steps.prepare.outputs.docker_image }} --file ./Dockerfile.RaspberryPi --output type=image,push=true .
