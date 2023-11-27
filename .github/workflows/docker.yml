@@ -32,4 +32,4 @@ jobs:
     - name: Run Buildx (push image)      
       if: success()      
       run: |        
-        docker buildx build \        --platform ${{ steps.prepare.outputs.docker_platform }} \        --tag ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }} \        --file ./Dockerfile.RaspberryPi \        --output type=image,push=true .
+        docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag ${{ steps.prepare.outputs.docker_image }} --file ./Dockerfile.RaspberryPi --output type=image,push=true .
