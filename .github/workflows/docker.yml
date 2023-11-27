@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     env:      
       DOCKER_REGISTRY: hub.docker.com
-      DOCKER_IMAGE: philhawthorne/ha-dockermon:json-arm
+      DOCKER_IMAGE: philhawthorne/ha-dockermon
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}  
       DOCKER_TARGET_PLATFORM: linux/arm/v7
@@ -32,4 +32,4 @@ jobs:
     - name: Run Buildx (push image)      
       if: success()      
       run: |        
-        docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag ${{ steps.prepare.outputs.docker_image }} --file ./Dockerfile.RaspberryPi --output type=image,push=true .
+        docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag ${{ steps.prepare.outputs.docker_image }}:json-arm --file ./Dockerfile.RaspberryPi --output type=image,push=true .
