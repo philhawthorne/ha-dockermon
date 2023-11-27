@@ -4,7 +4,7 @@ on:
     branches: [ master ]  
 jobs:   
   build:    
-    runs-on: ubuntu-18.04    
+    runs-on: ubuntu-latest
     env:      
       DOCKER_REGISTRY: hub.docker.com
       DOCKER_IMAGE: philhawthorne/ha-dockermon:json-arm
