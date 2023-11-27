@@ -1,4 +1,4 @@
-name: Docker Build/Publish Image 
+name: ARM Image Build
 on:  
   push:    
     branches: [ master ]  
@@ -10,7 +10,7 @@ jobs:
       DOCKER_IMAGE: philhawthorne/ha-dockermon
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}  
-      DOCKER_TARGET_PLATFORM: linux/arm/v7
+      DOCKER_TARGET_PLATFORM: linux/arm/v7,linux/arm64
     steps:    
     - name: Checkout the code       
       uses: actions/checkout@v1          
@@ -23,13 +23,17 @@ jobs:
       id: prepare      
       run: |        
         echo "docker_platform=${DOCKER_TARGET_PLATFORM}" >> "$GITHUB_OUTPUT"
-        echo "docker_image=philhawthorne/ha-dockermon:json-arm" >> "$GITHUB_OUTPUT"
+        echo "docker_image=philhawthorne/ha-dockermon" >> "$GITHUB_OUTPUT"
         echo "version=${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
-    - name: Docker Login      
-      if: success()      
+    - name: Docker Login
+      if: success()
       run: |        
         echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin          
-    - name: Run Buildx (push image)      
+    - name: Push arm-tag    
       if: success()      
       run: |        
-        docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag ${{ steps.prepare.outputs.docker_image }} --file ./Dockerfile.RaspberryPi --output type=image,push=true .
+        docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag ${{ steps.prepare.outputs.docker_image }}:arm --file ./Dockerfile.RaspberryPi --output type=image,push=true .
+    - name: Push arm-latest tag
+      if: success()      
+      run: |        
+        docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag ${{ steps.prepare.outputs.docker_image }}:arm-latest --file ./Dockerfile.RaspberryPi --output type=image,push=true .

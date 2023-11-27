@@ -1,0 +1,35 @@
+name: Master Image Build
+on:  
+  push:    
+    branches: [ master ]  
+jobs:   
+  build:    
+    runs-on: ubuntu-latest
+    env:      
+      DOCKER_REGISTRY: hub.docker.com
+      DOCKER_IMAGE: philhawthorne/ha-dockermon
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}  
+      DOCKER_TARGET_PLATFORM: linux/amd64
+    steps:    
+    - name: Checkout the code       
+      uses: actions/checkout@v1          
+    - name: Set up Docker Buildx      
+      uses: crazy-max/ghaction-docker-buildx@v1      
+      with:        
+        version: latest
+    - name: Prepare      
+      if: success()      
+      id: prepare      
+      run: |        
+        echo "docker_platform=${DOCKER_TARGET_PLATFORM}" >> "$GITHUB_OUTPUT"
+        echo "docker_image=philhawthorne/ha-dockermon:latest" >> "$GITHUB_OUTPUT"
+        echo "version=${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+    - name: Docker Login
+      if: success()
+      run: |        
+        echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin          
+    - name: Run Buildx (push image)      
+      if: success()      
+      run: |        
+        docker buildx build --platform ${{ steps.prepare.outputs.docker_platform }} --tag ${{ steps.prepare.outputs.docker_image }} --file ./Dockerfile --output type=image,push=true .
