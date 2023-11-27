@@ -1,4 +1,4 @@
-FROM node:9.4.0
+FROM node:18-buster-slim
 ENV config_dir=/config
 RUN mkdir -p /usr/src/app && mkdir /config
 WORKDIR /usr/src/app
