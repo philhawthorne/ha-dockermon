@@ -30,7 +30,7 @@
     "dockerode": "^2.5.3",
     "express": "^4.16.2",
     "express-basic-auth": "^1.2.0",
-    "js-yaml": "^3.13.1",
+    "js-yaml": "^4.1.1",
     "snyk": "^1.685.0"
   },
   "snyk": true
