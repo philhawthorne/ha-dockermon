@@ -1,5 +1,6 @@
-FROM node:18-buster-slim
+FROM balenalib/raspberry-pi-debian-node:16
 ENV config_dir=/config
+
 RUN mkdir -p /usr/src/app && mkdir /config
 WORKDIR /usr/src/app
 
