@@ -40,14 +40,21 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./Dockerfile.RaspberryPi
+          file: ./Dockerfile
           platforms: linux/arm/v7,linux/arm64
           push: true
           tags: philhawthorne/ha-dockermon:${{ github.event.release.tag_name }}-arm
 
       - name: Create multi-platform release manifest
-        run: >-
-          docker buildx imagetools create
-          --tag philhawthorne/ha-dockermon:${{ github.event.release.tag_name }}
-          philhawthorne/ha-dockermon:${{ github.event.release.tag_name }}-x64
-          philhawthorne/ha-dockermon:${{ github.event.release.tag_name }}-arm
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]]; then
+            echo "Invalid Docker release tag: $RELEASE_TAG" >&2
+            exit 1
+          fi
+
+          docker buildx imagetools create \
+            --tag "philhawthorne/ha-dockermon:${RELEASE_TAG}" \
+            "philhawthorne/ha-dockermon:${RELEASE_TAG}-x64" \
+            "philhawthorne/ha-dockermon:${RELEASE_TAG}-arm"
