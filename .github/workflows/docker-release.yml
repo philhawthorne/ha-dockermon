@@ -15,6 +15,17 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v4
 
+      - name: Validate release tag
+        id: release
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]]; then
+            echo "Invalid Docker release tag: $RELEASE_TAG" >&2
+            exit 1
+          fi
+          echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -34,26 +45,21 @@ jobs:
           file: ./Dockerfile
           platforms: linux/amd64
           push: true
-          tags: philhawthorne/ha-dockermon:${{ github.event.release.tag_name }}-x64
+          tags: philhawthorne/ha-dockermon:${{ steps.release.outputs.tag }}-x64
 
       - name: Build and push ARM images
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./Dockerfile
+          file: ./Dockerfile.RaspberryPi
           platforms: linux/arm/v7,linux/arm64
           push: true
-          tags: philhawthorne/ha-dockermon:${{ github.event.release.tag_name }}-arm
+          tags: philhawthorne/ha-dockermon:${{ steps.release.outputs.tag }}-arm
 
       - name: Create multi-platform release manifest
         env:
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
         run: |
-          if [[ ! "$RELEASE_TAG" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]]; then
-            echo "Invalid Docker release tag: $RELEASE_TAG" >&2
-            exit 1
-          fi
-
           docker buildx imagetools create \
             --tag "philhawthorne/ha-dockermon:${RELEASE_TAG}" \
             "philhawthorne/ha-dockermon:${RELEASE_TAG}-x64" \

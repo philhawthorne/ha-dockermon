@@ -39,7 +39,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./Dockerfile
+          file: ./Dockerfile.RaspberryPi
           platforms: linux/arm/v7,linux/arm64
           push: true
           tags: philhawthorne/ha-dockermon:edge-arm
