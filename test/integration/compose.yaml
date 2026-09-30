@@ -1,0 +1,42 @@
+services:
+  docker:
+    image: docker:27-dind
+    privileged: true
+    command: ["--host=tcp://0.0.0.0:2375", "--tls=false"]
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+    ports:
+      - "127.0.0.1:2375:2375"
+    healthcheck:
+      test: ["CMD", "docker", "info"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  mqtt:
+    image: eclipse-mosquitto:2
+    command:
+      - /bin/sh
+      - -c
+      - printf 'listener 1883 0.0.0.0\nallow_anonymous true\npersistence false\n' > /tmp/mosquitto.conf && mosquitto -c /tmp/mosquitto.conf -v
+    ports:
+      - "127.0.0.1:1883:1883"
+    healthcheck:
+      test: ["CMD-SHELL", "mosquitto_sub -h 127.0.0.1 -t '$$SYS/broker/version' -C 1 -W 2 >/dev/null"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  integration:
+    build:
+      context: ../..
+      dockerfile: test/integration/Dockerfile
+    environment:
+      TEST_DOCKER_HOST: docker
+      TEST_MQTT_URL: mqtt://mqtt:1883
+    depends_on:
+      docker:
+        condition: service_healthy
+      mqtt:
+        condition: service_healthy
+    profiles: ["test"]
