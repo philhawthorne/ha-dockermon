@@ -35,14 +35,30 @@ jobs:
           push: true
           tags: philhawthorne/ha-dockermon:edge-x64
 
-      - name: Build and push ARM edge images
+      - name: Build and push ARM64 edge image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile.RaspberryPi
-          platforms: linux/arm/v7,linux/arm64
+          platforms: linux/arm64/v8
           push: true
-          tags: philhawthorne/ha-dockermon:edge-arm
+          tags: philhawthorne/ha-dockermon:edge-arm64
+
+      - name: Build and push ARMv7 edge compatibility image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.RaspberryPiArmV7
+          platforms: linux/arm/v7
+          push: true
+          tags: philhawthorne/ha-dockermon:edge-armv7
+
+      - name: Create multi-platform ARM edge manifest
+        run: >-
+          docker buildx imagetools create
+          --tag philhawthorne/ha-dockermon:edge-arm
+          philhawthorne/ha-dockermon:edge-arm64
+          philhawthorne/ha-dockermon:edge-armv7
 
       - name: Create multi-platform edge manifest
         run: >-
