@@ -12,6 +12,7 @@ module.exports = {
 
     checkDeletedContainers: function(pushedContainers)
     {
+        var hadockermon = this;
         if (hadockermon.config.get("debug")) {
             console.log("Checking for deleted containers");
         }
@@ -39,7 +40,7 @@ module.exports = {
     getContainer: function(name, cb, error)
     {
         var hadockermon = this;
-        this.docker.listContainers({ limit:100, filters: { "name": [name] } }, function (err, containers) {
+        this.docker.listContainers({ all: true, limit:100, filters: { "name": [name] } }, function (err, containers) {
             if (err) {
                 if (typeof error == "function")
                     return error(500, err);
@@ -103,6 +104,7 @@ module.exports = {
     },
 
     handleMessage: function(topic, message, packet){
+        var hadockermon = this;
         //Extract the topic we were sent on
         if (topic.indexOf("state") >= 0) {
             if (hadockermon.config.get("debug")) {
@@ -146,15 +148,11 @@ module.exports = {
                         return;
                     }
                     setTimeout(function(){
-                        hadockermon.publishMqtt(mqtt_client);
+                        hadockermon.publishMqtt();
                     }, 200);
                 });
             }, function (status, message) {
-                console.log("Something went wrong? " + status + " " + message);
-                res.status(status);
-                if (message) {
-                    res.send(message);
-                }
+                console.log("Unable to stop container: " + status + " " + message);
             })
         } else if (message == "start" || (hadockermon.config.get("mqtt.hass_discovery.enabled") && message == "on")) {
             if (!hadockermon.isWhitelisted(container_name)) {
@@ -167,15 +165,11 @@ module.exports = {
                         return;
                     }
                     setTimeout(function(){
-                        hadockermon.publishMqtt(mqtt_client);
+                        hadockermon.publishMqtt();
                     }, 200);
                 });
             }, function (status, message) {
-                console.log("Something went wrong? " + status + " " + message);
-                res.status(status);
-                if (message) {
-                    res.send(message);
-                }
+                console.log("Unable to start container: " + status + " " + message);
             })
         }
         
@@ -279,7 +273,7 @@ module.exports = {
 
     mqttRemove: function(name)
     {
-        if (hadockermon.config.get("debug")) {
+        if (this.config.get("debug")) {
             console.log("Publishing remove state for " + name);
         }
         //Publish a remove topic
@@ -305,7 +299,7 @@ module.exports = {
         this.pushedContainers = [];
 
         //Get all containers
-        hadockermon = this;
+        var hadockermon = this;
         this.docker.listContainers( {
             all: true
         }, function (err, containers) {
@@ -356,14 +350,14 @@ module.exports = {
     
         this.publishMqtt();
 
-        hadockermon = this;
+        var hadockermon = this;
 
-        this.mqtt_client.on('message', hadockermon.handleMessage)
+        this.mqtt_client.on('message', hadockermon.handleMessage.bind(hadockermon))
 
         this.mqtt_client.subscribe(this.config.get("mqtt.base_topic") + "/#");
     
         this.mqttPublisher = setInterval(function(){
-            hadockermon.publishMqtt(mqtt_client);
+            hadockermon.publishMqtt();
         }, loop_interval * 1000);
 
         var topic = this.config.get("mqtt.base_topic") + "/status";
@@ -371,9 +365,10 @@ module.exports = {
             retain: true
         });
     
+        var hadockermon = this;
         this.mqtt_client.on('disconnect', function(){
             console.log("MQTT disconnected");
-            clearInterval(this.mqttPublisher);
+            clearInterval(hadockermon.mqttPublisher);
         });
     
         // process.exit();
@@ -394,6 +389,7 @@ module.exports = {
 
     topicName: function(names)
     {
+        var name;
         if (names[0]) {
             name = names[0];
             if (name[0] == "/") {

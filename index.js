@@ -9,38 +9,7 @@ var config = require('./default_settings.js');
 var docker = false;
 var dockermonMqtt = require("./mqtt/hadockermon_mqtt.js");
 var mqtt = require('mqtt');
-
-//If we are set to use MQTT, start the MQTT connection
-if (config.get("mqtt.enabled")) {
-    if (config.get("debug")) {
-        console.log("MQTT is enabled");
-    }
-    
-    options = {
-        clientId: 'hadockermon_' + Math.random().toString(16).substr(2, 8),
-        will: {
-            topic: config.get("mqtt.base_topic") + "/status",
-            payload: "offline",
-            retain: true
-        }
-    }
-
-    //If we have a username and password set, use them
-    if (config.get("mqtt.username") && config.get("mqtt.password")) {
-        options.username = config.get("mqtt.username");
-        options.password = config.get("mqtt.password");
-    }
-    mqtt_client = mqtt.connect('mqtt://' + config.get("mqtt.host") + ":" + config.get("mqtt.port"), options);
-    mqtt_client.on('connect', function(){
-        //Send the states for each running container
-        dockermonMqtt.init(config, mqtt_client, docker);
-        dockermonMqtt.startMqtt();
-    });
-} else {
-    if (config.get("debug")) {
-        console.log("MQTT not enabled");
-    }
-}
+var mqtt_client;
 
 //Setup express
 var app = express();
@@ -493,19 +462,17 @@ app.post('/pull/*', function (req, res) {
     console.log("Pull " + repoTag + " asynchronously");
     var callback = req.body.callback_uri ? req.body.callback_uri : false;
     if (callback == "" || !callback) {
-        res.send({
+        res.status(400).send({
             status: false,
             error: "No callback_uri specified. Use GET /pull/* to pull without a callback."
         });
-        res.status(400);
         return;
     } else {
         if (pull_lock.includes(repoTag)) {
-            res.send({
+            res.status(400).send({
                 status: false,
                 result: "Container is currently being pulled by another process"
             });
-            res.status(400);
             return;
         }
         pull_lock.push(repoTag);
@@ -522,6 +489,7 @@ app.post('/pull/*', function (req, res) {
             }
             var data = { status: false, error: `Failed to pull docker image ${repoTag}` };
             postCallbackRequest(callback, data);
+            removePullLock(repoTag);
             return;
         }
         console.log("Pulling image " + repoTag);
@@ -544,44 +512,16 @@ app.post('/pull/*', function (req, res) {
             postCallbackRequest(callback, data);
 
             //Clear the pull lock
-            const index = pull_lock.indexOf(repoTag);
-            if (index > -1) {
-                pull_lock.splice(index, 1);
-            }
+            removePullLock(repoTag);
         });
     });
 });
 
-//Attempt to connect to the Docker daemon
-switch (config.get("docker_connection.type")) {
-    case "http":
-        var docker = new Docker({ host: config.get("docker_connection.host"), port: config.get("docker_connection.port") });
-    break;
-
-    case "socket":
-        //Check if the socket is okay
-        try{
-            let stats = fs.statSync(config.get("docker_connection.path"));
-
-            if (!stats.isSocket()) {
-                throw new Error('Unable to connect to Docker socket at ' + config.get("docker_connection.path") + ". Is Docker running?");
-            }
-        } catch (e) {
-            console.error('Unable to connect to Docker socket at ' + config.get("docker_connection.path") + ". Is Docker running?");
-            if (config.get("debug"))
-                console.log(e);
-            process.exit(1);
-        }
-        //Socket is okay, connect to it
-        docker = new Docker({ socketPath: config.get("docker_connection.path") });
-    break;
-
-    default:
-        throw new Error("Docker connection type " + config.get("docker_connection.type") + " is invalid");
-    break;
+function removePullLock(repoTag)
+{
+    const index = pull_lock.indexOf(repoTag);
+    if (index > -1) pull_lock.splice(index, 1);
 }
-
-startServer(docker);
 
 function startServer(docker)
 {
@@ -590,9 +530,89 @@ function startServer(docker)
     });
 }
 
+function configure(dependencies)
+{
+    config = dependencies.config || config;
+    docker = dependencies.docker;
+    return app;
+}
+
+function start()
+{
+    switch (config.get("docker_connection.type")) {
+        case "http":
+            docker = new Docker({ host: config.get("docker_connection.host"), port: config.get("docker_connection.port") });
+            break;
+        case "socket":
+            try {
+                let stats = fs.statSync(config.get("docker_connection.path"));
+                if (!stats.isSocket()) {
+                    throw new Error('Unable to connect to Docker socket at ' + config.get("docker_connection.path") + ". Is Docker running?");
+                }
+            } catch (e) {
+                console.error('Unable to connect to Docker socket at ' + config.get("docker_connection.path") + ". Is Docker running?");
+                if (config.get("debug")) console.log(e);
+                process.exit(1);
+            }
+            docker = new Docker({ socketPath: config.get("docker_connection.path") });
+            break;
+        default:
+            throw new Error("Docker connection type " + config.get("docker_connection.type") + " is invalid");
+    }
+
+    if (config.get("mqtt.enabled")) {
+        var options = {
+            clientId: 'hadockermon_' + Math.random().toString(16).substr(2, 8),
+            will: {
+                topic: config.get("mqtt.base_topic") + "/status",
+                payload: "offline",
+                retain: true
+            }
+        };
+        if (config.get("mqtt.username") && config.get("mqtt.password")) {
+            options.username = config.get("mqtt.username");
+            options.password = config.get("mqtt.password");
+        }
+        mqtt_client = mqtt.connect('mqtt://' + config.get("mqtt.host") + ":" + config.get("mqtt.port"), options);
+        mqtt_client.on('connect', function(){
+            dockermonMqtt.init(config, mqtt_client, docker);
+            dockermonMqtt.startMqtt();
+        });
+    }
+
+    startServer(docker);
+    installSignalHandlers();
+}
+
+function installSignalHandlers()
+{
+    process.on('SIGINT', function() {
+        console.log("Caught interrupt signal");
+        if (config.get('mqtt.enabled')) {
+            if (dockermonMqtt.mqttPublisher) clearInterval(dockermonMqtt.mqttPublisher);
+            mqtt_client.end(function(){ process.exit(); });
+        } else {
+            process.exit();
+        }
+    });
+    process.on('SIGTERM', function() {
+        console.log("Caught terminate signal");
+        if (config.get('mqtt.enabled') && dockermonMqtt.mqttPublisher) {
+            clearInterval(dockermonMqtt.mqttPublisher);
+        }
+        process.exit();
+    });
+}
+
+module.exports = { app: app, configure: configure, start: start };
+
+if (require.main === module) {
+    start();
+}
+
 function getContainer(name, cb, error)
 {
-    docker.listContainers({ limit:100, filters: { "name": [name] } }, function (err, containers) {
+    docker.listContainers({ all: true, limit:100, filters: { "name": [name] } }, function (err, containers) {
         if (err) {
             if (typeof error == "function")
                 return error(500, err);
@@ -674,25 +694,3 @@ function postCallbackRequest(url, data)
     req.write(JSON.stringify(data));
     req.end();
 }
-
-process.on('SIGINT', function() {
-    console.log("Caught interrupt signal");
-    if (config.get('mqtt.enabled')) {
-        if (typeof intervalObj != 'undefined')
-            clearInterval(intervalObj);
-        mqtt_client.end(function(){
-            process.exit();
-        });
-    } else {
-        process.exit();
-    }
-});
-process.on('SIGTERM', function() {
-    console.log("Caught terminate signal");
-    if (config.get('mqtt.enabled')) {
-        if (typeof intervalObj != 'undefined')
-            clearInterval(intervalObj);
-    }
-    
-    process.exit();
-});

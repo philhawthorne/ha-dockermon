@@ -3,6 +3,11 @@
 {
 	"name": "HA-Dockermon",
 	"dockerFile": "Dockerfile",
+	"features": {
+		"ghcr.io/devcontainers/features/node:1": {
+			"version": "24"
+		}
+	},
 	"mounts": [ "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind" ],
 
 	// Set *default* container specific settings.json values on container create.

@@ -1,4 +1,4 @@
-FROM node:18-buster-slim
+FROM node:24-bookworm-slim
 ENV config_dir=/config
 RUN mkdir -p /usr/src/app && mkdir /config
 WORKDIR /usr/src/app
@@ -10,4 +10,4 @@ RUN npm install
 COPY default_settings.js /usr/src/app
 COPY index.js /usr/src/app
 COPY mqtt/hadockermon_mqtt.js /usr/src/app/mqtt/hadockermon_mqtt.js
-CMD npm start
+CMD ["npm", "start"]

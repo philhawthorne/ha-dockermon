@@ -105,7 +105,7 @@ You can run this service directly from a host that has NPM and NodeJS installed.
 </details>
 
 ## Raspberry Pi and other versions
-HA-Dockermon uses Docker Manifests to automatically download the correct version for your operating system. If this doesn't work on your system, please open an issue.
+HA-Dockermon uses Docker Manifests to automatically download the correct version for your operating system. The 64-bit ARM image uses Node 24. The 32-bit ARMv7 compatibility image uses Node 22 because Node 24 no longer provides ARMv7 binaries.
 
 Alternatively you may use the `arm` tag to specifically use a Raspberry Pi friendly image.
 
@@ -418,6 +418,23 @@ switch:
 
 # Further Reading
 For more in-depth Home Assistant examples and some ideas for use, please check out [this article on my blog](https://philhawthorne.com/ha-dockermon-use-home-assistant-to-monitor-start-or-stop-docker-containers).
+
+## Tests
+
+Node 24 or newer is recommended. Run the fast mocked API and MQTT tests with:
+
+```bash
+npm ci
+npm test
+```
+
+The Docker/MQTT integration suite runs in a Node 24 container alongside a disposable Docker-in-Docker daemon and Mosquitto broker. It creates and removes a temporary BusyBox container and pulls `busybox:1.36`. Docker Compose is required:
+
+```bash
+npm run test:integration
+```
+
+The integration command starts the test services and tears them down when complete. Set `TEST_DOCKER_HOST` or `TEST_MQTT_URL` in `test/integration/compose.yaml` to override the service addresses.
 
 [buymeacoffee-icon]: https://www.buymeacoffee.com/assets/img/guidelines/download-assets-sm-2.svg
 [buymeacoffee]: https://www.buymeacoffee.com/philhawthorne

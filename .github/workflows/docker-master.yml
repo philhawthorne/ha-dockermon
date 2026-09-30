@@ -35,16 +35,38 @@ jobs:
           push: true
           tags: philhawthorne/ha-dockermon:x64
 
-      - name: Build and push ARM images
+      - name: Build and push ARM64 image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile.RaspberryPi
-          platforms: linux/arm/v7,linux/arm64/v8
+          platforms: linux/arm64/v8
           push: true
           tags: |
-            philhawthorne/ha-dockermon:arm
-            philhawthorne/ha-dockermon:arm-latest
+            philhawthorne/ha-dockermon:arm64
+            philhawthorne/ha-dockermon:arm64-latest
+
+      - name: Build and push ARMv7 compatibility image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.RaspberryPiArmV7
+          platforms: linux/arm/v7
+          push: true
+          tags: |
+            philhawthorne/ha-dockermon:armv7
+            philhawthorne/ha-dockermon:armv7-latest
+
+      - name: Create multi-platform ARM manifests
+        run: |
+          docker buildx imagetools create \
+            --tag philhawthorne/ha-dockermon:arm \
+            philhawthorne/ha-dockermon:arm64 \
+            philhawthorne/ha-dockermon:armv7
+          docker buildx imagetools create \
+            --tag philhawthorne/ha-dockermon:arm-latest \
+            philhawthorne/ha-dockermon:arm64-latest \
+            philhawthorne/ha-dockermon:armv7-latest
 
       - name: Create multi-platform latest manifest
         run: >-
