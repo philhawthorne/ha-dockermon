@@ -31,8 +31,8 @@
     "express": "^4.17.1",
     "express-basic-auth": "^1.2.0",
     "js-yaml": "^3.13.1",
-    "snyk": "^1.685.0",
-    "mqtt": "^3.0.0"
+    "mqtt": "^5.16.0",
+    "snyk": "^1.685.0"
   },
   "snyk": true
 }
