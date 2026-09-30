@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 0",
-    "snyk-protect": "snyk protect",
+    "snyk-protect": "snyk-protect",
     "prepare": "npm run snyk-protect"
   },
   "repository": {
@@ -32,7 +32,7 @@
     "express-basic-auth": "^1.2.0",
     "js-yaml": "^3.13.1",
     "mqtt": "^5.16.0",
-    "snyk": "^1.685.0"
+    "@snyk/protect": "^1.1307.4"
   },
   "snyk": true
 }
