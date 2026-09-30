@@ -1,14 +1,14 @@
-name: Latest Docker Images
+name: Edge Docker Images
 
 on:
   push:
-    branches: [master]
+    branches: [dev]
 
 permissions:
   contents: read
 
 jobs:
-  latest:
+  edge:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
@@ -26,29 +26,27 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push amd64 image
+      - name: Build and push amd64 edge image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
           platforms: linux/amd64
           push: true
-          tags: philhawthorne/ha-dockermon:x64
+          tags: philhawthorne/ha-dockermon:edge-x64
 
-      - name: Build and push ARM images
+      - name: Build and push ARM edge images
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile.RaspberryPi
           platforms: linux/arm/v7,linux/arm64
           push: true
-          tags: |
-            philhawthorne/ha-dockermon:arm
-            philhawthorne/ha-dockermon:arm-latest
+          tags: philhawthorne/ha-dockermon:edge-arm
 
-      - name: Create multi-platform latest manifest
+      - name: Create multi-platform edge manifest
         run: >-
           docker buildx imagetools create
-          --tag philhawthorne/ha-dockermon:latest
-          philhawthorne/ha-dockermon:x64
-          philhawthorne/ha-dockermon:arm
+          --tag philhawthorne/ha-dockermon:edge
+          philhawthorne/ha-dockermon:edge-x64
+          philhawthorne/ha-dockermon:edge-arm
