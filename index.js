@@ -412,11 +412,10 @@ app.post('/container/:containerId/exec', function(req, res) {
 
     var command = req.body.command ? req.body.command : false;
     if (command == "" || !command) {
-        res.send({
+        res.status(400).send({
             status: false,
             error: "No command specified"
         });
-        res.status(400);
         return;
     }
 
